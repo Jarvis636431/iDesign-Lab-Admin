@@ -224,12 +224,6 @@ const formatDate = (value?: string | null) => {
   return parsed.isValid() ? parsed.format('YYYY-MM-DD') : '—'
 }
 
-const formatDateTime = (value?: string | null) => {
-  if (!value) return '—'
-  const parsed = dayjs(value)
-  return parsed.isValid() ? parsed.format('YYYY-MM-DD HH:mm') : '—'
-}
-
 const courseStats = computed(() => {
   const total = pagination.total
   const today = courses.value.filter((item) =>
@@ -337,31 +331,18 @@ onMounted(() => {
         v-loading="loading"
         empty-text="暂无课程安排"
       >
-        <el-table-column prop="ID" label="ID" width="80" sortable />
-        <el-table-column label="课程安排" min-width="240">
+        <el-table-column prop="ID" label="ID" width="90" sortable />
+        <el-table-column label="日期" width="160">
           <template #default="{ row }">
-            <div class="cell-main">
-              <span class="cell-title">{{ row.reason }}</span>
-              <div class="cell-meta">
-                <el-tag size="small" type="info">
-                  {{ timeSlotLabel(row.time_slot) }}
-                </el-tag>
-                <span>日期：{{ formatDate(row.date) }}</span>
-                <span>教室：{{ row.room_id }}</span>
-              </div>
-            </div>
+            {{ formatDate(row.date) }}
           </template>
         </el-table-column>
-        <el-table-column label="创建时间" width="180">
+        <el-table-column label="时间段" min-width="240">
           <template #default="{ row }">
-            {{ formatDateTime(row.created_at) }}
+            {{ timeSlotLabel(row.time_slot) }}
           </template>
         </el-table-column>
-        <el-table-column label="更新时间" width="180">
-          <template #default="{ row }">
-            {{ formatDateTime(row.updated_at) }}
-          </template>
-        </el-table-column>
+        <el-table-column prop="room_id" label="教室" width="120" />
         <el-table-column label="操作" width="160" fixed="right">
           <template #default="{ row }">
             <el-space>
