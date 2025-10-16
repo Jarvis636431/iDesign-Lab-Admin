@@ -208,6 +208,7 @@ onMounted(() => {
             v-model="filters.time_slot"
             placeholder="全部时间段"
             clearable
+            style="width: 220px"
           >
             <el-option
               v-for="item in timeSlotOptions"
@@ -218,7 +219,12 @@ onMounted(() => {
           </el-select>
         </el-form-item>
         <el-form-item label="状态">
-          <el-select v-model="filters.status" placeholder="全部状态" clearable>
+          <el-select
+            v-model="filters.status"
+            placeholder="全部状态"
+            clearable
+            style="width: 220px"
+          >
             <el-option
               v-for="item in statusOptions"
               :key="item.value"
@@ -231,14 +237,6 @@ onMounted(() => {
           <el-input
             v-model.trim="filters.room_id"
             placeholder="例如 10005"
-            clearable
-            style="width: 180px"
-          />
-        </el-form-item>
-        <el-form-item label="创建者账号">
-          <el-input
-            v-model.trim="filters.creator_account"
-            placeholder="输入账号"
             clearable
             style="width: 180px"
           />
@@ -301,6 +299,13 @@ onMounted(() => {
           </template>
         </el-table-column>
         <el-table-column prop="room_id" label="教室" width="120" />
+        <el-table-column label="状态" width="140">
+          <template #default="{ row }">
+            <el-tag :type="statusTagType(row.status)" effect="dark">
+              {{ getReservationStatusMeta(row.status)?.label ?? row.status }}
+            </el-tag>
+          </template>
+        </el-table-column>
         <el-table-column
           prop="purpose"
           label="用途"
