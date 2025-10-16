@@ -51,12 +51,6 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../views/Login.vue'),
     meta: { public: true, title: '登录' },
   },
-  {
-    path: '/register',
-    name: 'Register',
-    component: () => import('../views/Register.vue'),
-    meta: { public: true, title: '注册' },
-  },
 ]
 
 const router = createRouter({
@@ -88,7 +82,7 @@ router.beforeEach(async (to) => {
     }
   }
 
-  if (authStore.isAuthenticated && ['/login', '/register'].includes(to.path)) {
+  if (authStore.isAuthenticated && to.path === '/login') {
     return { path: '/' }
   }
 
