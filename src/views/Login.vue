@@ -12,14 +12,14 @@ const authStore = useAuthStore()
 const { loading } = storeToRefs(authStore)
 
 const form = reactive({
-  username: '',
+  account: '',
   password: '',
 })
 
 const formError = ref<string | null>(null)
 
 const validateForm = () => {
-  if (!form.username.trim()) {
+  if (!form.account.trim()) {
     formError.value = '请填写账号'
     return false
   }
@@ -36,7 +36,7 @@ const handleSubmit = async () => {
 
   try {
     await authStore.login({
-      username: form.username,
+      account: form.account,
       password: form.password,
     })
     ElMessage.success('登录成功')
@@ -65,7 +65,7 @@ const handleSubmit = async () => {
       >
         <el-form-item label="账号">
           <el-input
-            v-model.trim="form.username"
+            v-model.trim="form.account"
             placeholder="请输入账号"
             autocomplete="username"
           />
