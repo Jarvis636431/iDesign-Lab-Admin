@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { RouterView, useRoute, useRouter } from 'vue-router'
 import {
   Odometer,
@@ -9,9 +9,8 @@ import {
   Timer,
   OfficeBuilding,
   Avatar,
-  Fold,
-  Expand,
 } from '@element-plus/icons-vue'
+import { ElMessageBox } from 'element-plus'
 import { useAuthStore } from '../stores/auth'
 import { storeToRefs } from 'pinia'
 
@@ -19,7 +18,6 @@ const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
 const { user: currentUser, isAuthenticated } = storeToRefs(authStore)
-const isCollapsed = ref(false)
 const brandLogo = new URL('../assets/logo.png', import.meta.url).href
 
 const menuItems = computed(() => {
@@ -79,19 +77,29 @@ const userInitials = computed(() => {
 })
 
 const handleLogout = () => {
-  authStore.logout()
-  router.push({ path: '/login' })
+  ElMessageBox.confirm('确认退出当前账号吗？', '退出登录', {
+    confirmButtonText: '确认',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
+    .then(() => {
+      authStore.logout()
+      router.push({ path: '/login' })
+    })
+    .catch(() => {})
 }
 </script>
 
 <template>
   <el-container class="admin-layout">
-    <el-aside :width="isCollapsed ? '72px' : '220px'" class="admin-sidebar">
-      <div class="sidebar-brand" :class="{ collapsed: isCollapsed }">
-        <img :src="brandLogo" alt="iDesign Lab" class="brand-logo" />
-        <div class="brand-text" v-if="!isCollapsed">
-          <span class="brand-mark">iDesign Lab</span>
-          <span class="brand-sub">实验室管理系统</span>
+    <el-aside width="220px" class="admin-sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-info">
+          <img :src="brandLogo" alt="iDesign Lab" class="brand-logo" />
+          <div class="brand-text">
+            <span class="brand-mark">iDesign Lab</span>
+            <span class="brand-sub">实验室管理系统</span>
+          </div>
         </div>
       </div>
       <el-menu
@@ -110,8 +118,8 @@ const handleLogout = () => {
           <span>{{ item.label }}</span>
         </el-menu-item>
       </el-menu>
-      <footer class="sidebar-footer" v-if="currentUser" :class="{ collapsed: isCollapsed }">
-        <el-avatar class="user-avatar" :size="isCollapsed ? 40 : 48">
+      <footer class="sidebar-footer" v-if="currentUser">
+        <el-avatar class="user-avatar" :size="48">
           <template v-if="currentUser?.Name">
             {{ userInitials }}
           </template>
@@ -119,29 +127,14 @@ const handleLogout = () => {
             <Avatar />
           </template>
         </el-avatar>
-        <div class="user-info" v-if="!isCollapsed">
+        <div class="user-info">
           <span class="user-name">{{ displayName }}</span>
           <span class="user-role">{{ roleDisplay }}</span>
-          <el-button type="primary" plain size="small" @click="handleLogout">
-            退出登录
-          </el-button>
         </div>
-        <el-button
-          v-else
-          type="primary"
-          circle
-          class="logout-icon"
-          size="small"
-          @click="handleLogout"
-        >
-          <el-icon><Avatar /></el-icon>
+        <el-button type="primary" plain size="small" class="logout-btn" @click="handleLogout">
+          退出登录
         </el-button>
       </footer>
-      <button class="collapse-btn" type="button" @click="isCollapsed = !isCollapsed">
-        <el-icon>
-          <component :is="isCollapsed ? Expand : Fold" />
-        </el-icon>
-      </button>
     </el-aside>
     <el-main class="admin-main">
       <div class="admin-content">
@@ -174,8 +167,10 @@ const handleLogout = () => {
   padding: 0 1.25rem 1.5rem;
 }
 
-.sidebar-brand.collapsed {
-  padding: 0 0 1.5rem;
+.brand-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .brand-logo {
@@ -277,29 +272,6 @@ const handleLogout = () => {
 .user-role {
   font-size: 0.75rem;
   color: rgba(255, 255, 255, 0.7);
-}
-
-.logout-icon {
-  border: none;
-}
-
-.collapse-btn {
-  margin: 0.75rem auto 0;
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
-  border: none;
-  background: rgba(255, 255, 255, 0.12);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.collapse-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
 }
 
 .admin-main {
