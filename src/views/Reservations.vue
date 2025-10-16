@@ -1,161 +1,193 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
-import dayjs from 'dayjs'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { getReservations, cancelReservation } from '../services/reservations'
-import type { Reservation, ReservationQuery, ReservationStatus, TimeSlot } from '../types/reservation'
+import { computed, onMounted, reactive, ref } from "vue";
+import dayjs from "dayjs";
+import { ElMessage, ElMessageBox } from "element-plus";
+import { getReservations, cancelReservation } from "../services/reservations";
+import type {
+  Reservation,
+  ReservationQuery,
+  ReservationStatus,
+  TimeSlot,
+} from "../types/reservation";
 
-type DateRange = [Date, Date]
+type DateRange = [Date, Date];
 
-const loading = ref(false)
-const reservations = ref<Reservation[]>([])
-const detailVisible = ref(false)
-const currentReservation = ref<Reservation | null>(null)
+const loading = ref(false);
+const reservations = ref<Reservation[]>([]);
+const detailVisible = ref(false);
+const currentReservation = ref<Reservation | null>(null);
 
 const filters = reactive({
   dateRange: [] as DateRange | [],
-  time_slot: '' as TimeSlot | '',
-  status: '' as ReservationStatus | '',
-  room_id: '',
-  creator_account: '',
-  participant_account: '',
-})
+  time_slot: "" as TimeSlot | "",
+  status: "" as ReservationStatus | "",
+  room_id: "",
+  creator_account: "",
+  participant_account: "",
+});
 
 const timeSlotOptions: Array<{ label: string; value: TimeSlot }> = [
-  { label: '上午 · 09:00-10:30', value: 'morning' },
-  { label: '中午 · 10:30-12:00', value: 'noon' },
-  { label: '下午 · 13:00-14:30', value: 'afternoon' },
-  { label: '傍晚 · 14:30-16:00', value: 'evening' },
-]
+  { label: "09:00-10:30", value: "morning" },
+  { label: "10:30-12:00", value: "noon" },
+  { label: "13:00-14:30", value: "afternoon" },
+  { label: "14:30-16:00", value: "evening" },
+];
 
 const statusOptions: Array<{ label: string; value: ReservationStatus }> = [
-  { label: '待开始', value: 'pending' },
-  { label: '进行中', value: 'in_progress' },
-  { label: '已完成', value: 'completed' },
-  { label: '已取消', value: 'cancelled' },
-  { label: '违规', value: 'violated' },
-]
+  { label: "待开始", value: "pending" },
+  { label: "进行中", value: "in_progress" },
+  { label: "已完成", value: "completed" },
+  { label: "已取消", value: "cancelled" },
+  { label: "已违规", value: "violated" },
+];
 
 const statusTagType = (status: ReservationStatus) => {
   switch (status) {
-    case 'pending':
-      return 'warning'
-    case 'in_progress':
-      return 'success'
-    case 'completed':
-      return 'info'
-    case 'cancelled':
-      return ''
-    case 'violated':
-      return 'danger'
+    case "pending":
+      return "warning";
+    case "in_progress":
+      return "success";
+    case "completed":
+      return "info";
+    case "cancelled":
+      return "";
+    case "violated":
+      return "danger";
     default:
-      return ''
+      return "";
   }
-}
+};
 
-const canCancel = (reservation: Reservation) => reservation.status === 'pending'
+const canCancel = (reservation: Reservation) =>
+  reservation.status === "pending";
 
 const buildQuery = (): ReservationQuery => {
-  const query: ReservationQuery = {}
+  const query: ReservationQuery = {};
   if (filters.dateRange.length === 2) {
-    const [start, end] = filters.dateRange
-    query.start_date = dayjs(start).format('YYYY-MM-DD')
-    query.end_date = dayjs(end).format('YYYY-MM-DD')
+    const [start, end] = filters.dateRange;
+    query.start_date = dayjs(start).format("YYYY-MM-DD");
+    query.end_date = dayjs(end).format("YYYY-MM-DD");
   }
   if (filters.time_slot) {
-    query.time_slot = filters.time_slot
+    query.time_slot = filters.time_slot;
   }
   if (filters.status) {
-    query.status = filters.status
+    query.status = filters.status;
   }
   if (filters.room_id) {
-    query.room_id = Number(filters.room_id)
+    query.room_id = Number(filters.room_id);
   }
   if (filters.creator_account.trim()) {
-    query.creator_account = filters.creator_account.trim()
+    query.creator_account = filters.creator_account.trim();
   }
   if (filters.participant_account.trim()) {
-    query.participant_account = filters.participant_account.trim()
+    query.participant_account = filters.participant_account.trim();
   }
-  return query
-}
+  return query;
+};
 
 const fetchReservations = async () => {
-  loading.value = true
+  loading.value = true;
   try {
-    const response = await getReservations(buildQuery())
-    reservations.value = response.data
+    const response = await getReservations(buildQuery());
+    reservations.value = response.data;
   } catch (error) {
-    ElMessage.error('获取预约列表失败，请稍后重试')
+    ElMessage.error("获取预约列表失败，请稍后重试");
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 const handleSearch = () => {
-  fetchReservations()
-}
+  fetchReservations();
+};
 
 const handleReset = () => {
-  filters.dateRange = []
-  filters.time_slot = ''
-  filters.status = ''
-  filters.room_id = ''
-  filters.creator_account = ''
-  filters.participant_account = ''
-  fetchReservations()
-}
+  filters.dateRange = [];
+  filters.time_slot = "";
+  filters.status = "";
+  filters.room_id = "";
+  filters.creator_account = "";
+  filters.participant_account = "";
+  fetchReservations();
+};
 
 const handleViewDetail = (row: Reservation) => {
-  currentReservation.value = row
-  detailVisible.value = true
-}
+  currentReservation.value = row;
+  detailVisible.value = true;
+};
 
 const handleCancelReservation = (row: Reservation) => {
-  ElMessageBox.confirm(`确定要取消预约「${row.purpose}」吗？`, '确认取消', {
-    type: 'warning',
-    confirmButtonText: '确认取消',
-    cancelButtonText: '再想想',
+  ElMessageBox.confirm(`确定要取消预约「${row.purpose}」吗？`, "确认取消", {
+    type: "warning",
+    confirmButtonText: "确认取消",
+    cancelButtonText: "再想想",
   })
     .then(async () => {
       try {
-        await cancelReservation(row.ID)
-        ElMessage.success('预约已取消')
-        fetchReservations()
+        await cancelReservation(row.ID);
+        ElMessage.success("预约已取消");
+        fetchReservations();
       } catch (error) {
-        ElMessage.error('取消预约失败，请稍后重试')
+        ElMessage.error("取消预约失败，请稍后重试");
       }
     })
-    .catch(() => {})
-}
+    .catch(() => {});
+};
 
-const timeSlotLabel = (value?: TimeSlot | '') => {
-  if (!value) return '—'
-  return timeSlotOptions.find((item) => item.value === value)?.label ?? value
-}
+const timeSlotLabel = (value?: TimeSlot | "") => {
+  if (!value) return "—";
+  return timeSlotOptions.find((item) => item.value === value)?.label ?? value;
+};
 
 const reservationSummary = computed(() => {
-  const total = reservations.value.length
-  const pending = reservations.value.filter((item) => item.status === 'pending').length
-  const inProgress = reservations.value.filter((item) => item.status === 'in_progress').length
-  return { total, pending, inProgress }
-})
+  const total = reservations.value.length;
+  const pending = reservations.value.filter(
+    (item) => item.status === "pending"
+  ).length;
+  const inProgress = reservations.value.filter(
+    (item) => item.status === "in_progress"
+  ).length;
+  return { total, pending, inProgress };
+});
 
-const formatDateTime = (value?: string | null) => {
-  if (!value) return '—'
-  const parsed = dayjs(value)
-  return parsed.isValid() ? parsed.format('YYYY-MM-DD HH:mm') : '—'
-}
+const participantNames = (participants: Reservation["participants"]) =>
+  participants.map((item) => item.name).join("、") || "—";
+
+const currentPhotos = computed(() => {
+  const reservation = currentReservation.value;
+  if (!reservation) return [];
+  const urls = new Set<string>();
+  reservation.photo_urls?.forEach((url) => urls.add(url));
+  if (reservation.photos_by_category) {
+    Object.values(reservation.photos_by_category).forEach((arr) => {
+      arr?.forEach((url) => urls.add(url));
+    });
+  }
+  return Array.from(urls);
+});
+
+const categorizedPhotos = computed<Record<string, string[]>>(
+  () => currentReservation.value?.photos_by_category ?? {}
+);
+
+const photoCategoryGroups = computed(() =>
+  Object.entries(categorizedPhotos.value)
+    .filter(([, urls]) => (urls?.length ?? 0) > 0)
+    .map(([category, urls]) => ({ category, urls }))
+);
+
+const hasPhotoCategories = computed(() => photoCategoryGroups.value.length > 0);
 
 const formatDate = (value?: string | null) => {
-  if (!value) return '—'
-  const parsed = dayjs(value)
-  return parsed.isValid() ? parsed.format('YYYY-MM-DD') : '—'
-}
+  if (!value) return "—";
+  const parsed = dayjs(value);
+  return parsed.isValid() ? parsed.format("YYYY-MM-DD") : "—";
+};
 
 onMounted(() => {
-  fetchReservations()
-})
+  fetchReservations();
+});
 </script>
 
 <template>
@@ -195,7 +227,11 @@ onMounted(() => {
           />
         </el-form-item>
         <el-form-item label="时间段">
-          <el-select v-model="filters.time_slot" placeholder="全部时间段" clearable>
+          <el-select
+            v-model="filters.time_slot"
+            placeholder="全部时间段"
+            clearable
+          >
             <el-option
               v-for="item in timeSlotOptions"
               :key="item.value"
@@ -240,7 +276,9 @@ onMounted(() => {
         </el-form-item>
         <el-form-item>
           <el-space>
-            <el-button type="primary" :loading="loading" @click="handleSearch">查询</el-button>
+            <el-button type="primary" :loading="loading" @click="handleSearch"
+              >查询</el-button
+            >
             <el-button @click="handleReset">重置</el-button>
           </el-space>
         </el-form-item>
@@ -251,7 +289,12 @@ onMounted(() => {
       <template #header>
         <div class="table-header">
           <span>预约列表</span>
-          <el-button type="primary" link :loading="loading" @click="fetchReservations">
+          <el-button
+            type="primary"
+            link
+            :loading="loading"
+            @click="fetchReservations"
+          >
             刷新
           </el-button>
         </div>
@@ -265,56 +308,34 @@ onMounted(() => {
         empty-text="暂无预约记录"
       >
         <el-table-column prop="ID" label="ID" width="80" sortable />
-        <el-table-column label="预约信息" min-width="220">
-          <template #default="{ row }">
-            <div class="cell-main">
-              <span class="cell-title">{{ row.purpose }}</span>
-              <div class="cell-meta">
-                <el-tag size="small" type="info">{{ timeSlotLabel(row.time_slot) }}</el-tag>
-                <span>日期：{{ formatDate(row.date) }}</span>
-                <span>教室：{{ row.room_id }}</span>
-              </div>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column label="创建者" min-width="160">
-          <template #default="{ row }">
-            <div class="cell-main">
-              <span class="cell-title">{{ row.creator_name ?? '—' }}</span>
-              <span class="cell-meta-text">{{ row.creator_account ?? '—' }}</span>
-            </div>
-          </template>
-        </el-table-column>
         <el-table-column label="参与者" min-width="200">
           <template #default="{ row }">
-            <el-space wrap size="small">
-              <el-tag
-                v-for="participant in row.participants"
-                :key="participant.user_id"
-                type="success"
-                effect="plain"
-              >
-                {{ participant.name }} / {{ participant.account ?? '—' }}
-              </el-tag>
-            </el-space>
+            {{ participantNames(row.participants) }}
           </template>
         </el-table-column>
-        <el-table-column label="状态" width="120">
+        <el-table-column label="日期" width="140">
           <template #default="{ row }">
-            <el-tag :type="statusTagType(row.status)" effect="dark">
-              {{ statusOptions.find((item) => item.value === row.status)?.label ?? row.status }}
-            </el-tag>
+            {{ formatDate(row.date) }}
           </template>
         </el-table-column>
-        <el-table-column label="创建时间" width="180">
+        <el-table-column label="时间段" width="180">
           <template #default="{ row }">
-            {{ formatDateTime(row.created_at) }}
+            {{ timeSlotLabel(row.time_slot) }}
           </template>
         </el-table-column>
+        <el-table-column prop="room_id" label="教室" width="120" />
+        <el-table-column
+          prop="purpose"
+          label="用途"
+          min-width="200"
+          show-overflow-tooltip
+        />
         <el-table-column label="操作" width="160" fixed="right">
           <template #default="{ row }">
             <el-space>
-              <el-button type="primary" link @click="handleViewDetail(row)">查看详情</el-button>
+              <el-button type="primary" link @click="handleViewDetail(row)"
+                >查看详情</el-button
+              >
               <el-button
                 v-if="canCancel(row)"
                 type="danger"
@@ -340,8 +361,8 @@ onMounted(() => {
         <section>
           <h3>基本信息</h3>
           <el-descriptions :column="1" border size="small">
-            <el-descriptions-item label="主题">
-              {{ currentReservation?.purpose ?? '—' }}
+            <el-descriptions-item label="用途">
+              {{ currentReservation?.purpose ?? "—" }}
             </el-descriptions-item>
             <el-descriptions-item label="日期">
               {{ formatDate(currentReservation?.date) }}
@@ -350,13 +371,17 @@ onMounted(() => {
               {{ timeSlotLabel(currentReservation?.time_slot) }}
             </el-descriptions-item>
             <el-descriptions-item label="教室">
-              {{ currentReservation?.room_id ?? '—' }}
+              {{ currentReservation?.room_id ?? "—" }}
             </el-descriptions-item>
             <el-descriptions-item label="状态">
-              <el-tag :type="statusTagType(currentReservation?.status ?? 'pending')" effect="dark">
+              <el-tag
+                :type="statusTagType(currentReservation?.status ?? 'pending')"
+                effect="dark"
+              >
                 {{
-                  statusOptions.find((item) => item.value === currentReservation?.status)?.label ??
-                  currentReservation?.status
+                  statusOptions.find(
+                    (item) => item.value === currentReservation?.status
+                  )?.label ?? currentReservation?.status
                 }}
               </el-tag>
             </el-descriptions-item>
@@ -367,10 +392,10 @@ onMounted(() => {
           <h3>创建者</h3>
           <el-descriptions :column="1" border size="small">
             <el-descriptions-item label="姓名">
-              {{ currentReservation?.creator_name ?? '—' }}
+              {{ currentReservation?.creator_name ?? "—" }}
             </el-descriptions-item>
             <el-descriptions-item label="账号">
-              {{ currentReservation?.creator_account ?? '—' }}
+              {{ currentReservation?.creator_account ?? "—" }}
             </el-descriptions-item>
           </el-descriptions>
         </section>
@@ -378,7 +403,7 @@ onMounted(() => {
         <section>
           <h3>参与者</h3>
           <el-empty
-            v-if="!(currentReservation?.participants?.length)"
+            v-if="!currentReservation?.participants?.length"
             description="暂无参与者"
             :image-size="80"
           />
@@ -393,6 +418,34 @@ onMounted(() => {
             <el-table-column prop="account" label="账号" />
             <el-table-column prop="role" label="角色" />
           </el-table>
+        </section>
+
+        <section v-if="currentPhotos.length && !hasPhotoCategories">
+          <h3>现场照片</h3>
+          <el-space wrap size="small">
+            <el-image
+              v-for="url in currentPhotos"
+              :key="url"
+              :src="url"
+              :preview-src-list="currentPhotos"
+              fit="cover"
+              class="photo-thumb"
+            />
+          </el-space>
+        </section>
+
+        <section v-for="group in photoCategoryGroups" :key="group.category">
+          <h3>照片 - {{ group.category }}</h3>
+          <el-space wrap size="small">
+            <el-image
+              v-for="url in group.urls"
+              :key="url"
+              :src="url"
+              :preview-src-list="group.urls"
+              fit="cover"
+              class="photo-thumb"
+            />
+          </el-space>
         </section>
       </div>
     </el-drawer>
@@ -490,5 +543,13 @@ onMounted(() => {
 
 .detail-table-header {
   background-color: #f5f7fa !important;
+}
+
+.photo-thumb {
+  width: 100px;
+  height: 100px;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #f2f4f7;
 }
 </style>
