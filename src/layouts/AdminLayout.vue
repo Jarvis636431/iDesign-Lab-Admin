@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { RouterView, useRoute, useRouter } from 'vue-router'
 import {
   Odometer,
@@ -9,6 +9,8 @@ import {
   Timer,
   OfficeBuilding,
   Avatar,
+  Fold,
+  Expand,
 } from '@element-plus/icons-vue'
 import { useAuthStore } from '../stores/auth'
 import { storeToRefs } from 'pinia'
@@ -17,6 +19,8 @@ const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
 const { user: currentUser, isAuthenticated } = storeToRefs(authStore)
+const isCollapsed = ref(false)
+const brandLogo = new URL('../assets/logo.png', import.meta.url).href
 
 const menuItems = computed(() => {
   if (!isAuthenticated.value) return []
@@ -82,10 +86,13 @@ const handleLogout = () => {
 
 <template>
   <el-container class="admin-layout">
-    <el-aside width="220px" class="admin-sidebar">
-      <div class="sidebar-brand">
-        <span class="brand-mark">iDesignLab</span>
-        <span class="brand-sub">Admin</span>
+    <el-aside :width="isCollapsed ? '72px' : '220px'" class="admin-sidebar">
+      <div class="sidebar-brand" :class="{ collapsed: isCollapsed }">
+        <img :src="brandLogo" alt="iDesign Lab" class="brand-logo" />
+        <div class="brand-text" v-if="!isCollapsed">
+          <span class="brand-mark">iDesign Lab</span>
+          <span class="brand-sub">实验室管理系统</span>
+        </div>
       </div>
       <el-menu
         :default-active="route.path"
@@ -103,34 +110,43 @@ const handleLogout = () => {
           <span>{{ item.label }}</span>
         </el-menu-item>
       </el-menu>
-      <footer class="sidebar-footer" v-if="currentUser">
-        <div class="user-meta">
-          <el-avatar class="user-avatar" :size="40">
-            <template v-if="currentUser?.Name">
-              {{ userInitials }}
-            </template>
-            <template v-else>
-              <Avatar />
-            </template>
-          </el-avatar>
-          <div class="user-info">
-            <span class="user-name">{{ displayName }}</span>
-            <span class="user-role">{{ roleDisplay }}</span>
-          </div>
+      <footer class="sidebar-footer" v-if="currentUser" :class="{ collapsed: isCollapsed }">
+        <el-avatar class="user-avatar" :size="isCollapsed ? 40 : 48">
+          <template v-if="currentUser?.Name">
+            {{ userInitials }}
+          </template>
+          <template v-else>
+            <Avatar />
+          </template>
+        </el-avatar>
+        <div class="user-info" v-if="!isCollapsed">
+          <span class="user-name">{{ displayName }}</span>
+          <span class="user-role">{{ roleDisplay }}</span>
+          <el-button type="primary" plain size="small" @click="handleLogout">
+            退出登录
+          </el-button>
         </div>
         <el-button
-          class="logout-btn"
+          v-else
           type="primary"
-          plain
+          circle
+          class="logout-icon"
           size="small"
           @click="handleLogout"
         >
-          退出登录
+          <el-icon><Avatar /></el-icon>
         </el-button>
       </footer>
+      <button class="collapse-btn" type="button" @click="isCollapsed = !isCollapsed">
+        <el-icon>
+          <component :is="isCollapsed ? Expand : Fold" />
+        </el-icon>
+      </button>
     </el-aside>
     <el-main class="admin-main">
-      <RouterView />
+      <div class="admin-content">
+        <RouterView />
+      </div>
     </el-main>
   </el-container>
 </template>
@@ -152,22 +168,40 @@ const handleLogout = () => {
 
 .sidebar-brand {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  padding: 0 1.5rem 1rem;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 0 1.25rem 1.5rem;
+}
+
+.sidebar-brand.collapsed {
+  padding: 0 0 1.5rem;
+}
+
+.brand-logo {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.5rem;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
   gap: 0.25rem;
 }
 
 .brand-mark {
-  font-size: 1.125rem;
-  font-weight: 600;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
 }
 
 .brand-sub {
   font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.7);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.65);
+  letter-spacing: 0.05em;
 }
 
 .sidebar-menu {
@@ -176,24 +210,64 @@ const handleLogout = () => {
   background: transparent;
 }
 
-.sidebar-footer {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  padding: 1rem 1.5rem 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+.sidebar-menu :deep(.el-menu) {
+  border-right: none;
+  background: transparent;
 }
 
-.user-meta {
+.sidebar-menu :deep(.el-menu-item) {
+  color: rgba(255, 255, 255, 0.9);
+  border-radius: 10px;
+  margin: 0 12px;
+  height: 44px;
+  line-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sidebar-menu :deep(.el-menu-item .el-icon) {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.sidebar-menu :deep(.el-menu-item:hover),
+.sidebar-menu :deep(.el-menu-item:focus-visible) {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.sidebar-menu :deep(.el-menu-item.is-active) {
+  background: linear-gradient(90deg, rgba(64, 158, 255, 0.32), rgba(64, 158, 255, 0.14));
+  color: #fff;
+  position: relative;
+}
+
+.sidebar-menu :deep(.el-menu-item.is-active::before) {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 10px;
+  bottom: 10px;
+  width: 3px;
+  border-radius: 2px;
+  background: #409eff;
+}
+
+.sidebar-footer {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  padding: 1.25rem 1.25rem 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-footer.collapsed {
+  justify-content: center;
 }
 
 .user-info {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.35rem;
 }
 
 .user-name {
@@ -205,13 +279,42 @@ const handleLogout = () => {
   color: rgba(255, 255, 255, 0.7);
 }
 
-.logout-btn {
-  align-self: stretch;
+.logout-icon {
+  border: none;
+}
+
+.collapse-btn {
+  margin: 0.75rem auto 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  border: none;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.collapse-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .admin-main {
-  padding: 1.5rem 2rem;
+  display: flex;
+  flex: 1;
+  padding: 0;
   background-color: #f5f7fa;
+  overflow: hidden;
+}
+
+.admin-content {
+  flex: 1;
+  height: 100%;
+  padding: 1.5rem 2rem;
+  overflow: auto;
 }
 </style>
 .user-avatar :deep(.el-avatar__inner) {
