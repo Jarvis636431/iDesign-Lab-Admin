@@ -1,7 +1,15 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { RouterView, useRoute, useRouter } from 'vue-router'
-import { Odometer, UserFilled, Calendar, Collection, Timer, Avatar } from '@element-plus/icons-vue'
+import {
+  Odometer,
+  UserFilled,
+  Calendar,
+  Collection,
+  Timer,
+  OfficeBuilding,
+  Avatar,
+} from '@element-plus/icons-vue'
 import { useAuthStore } from '../stores/auth'
 import { storeToRefs } from 'pinia'
 
@@ -37,6 +45,11 @@ const menuItems = computed(() => {
       label: '学期管理',
       path: '/semesters',
       icon: Timer,
+    },
+    {
+      label: '教室管理',
+      path: '/rooms',
+      icon: OfficeBuilding,
     },
   ]
 })
