@@ -2,15 +2,13 @@ import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { login as loginRequest } from '../services/auth'
 import { getCurrentUser } from '../services/user'
-import type { LoginPayload, LoginResponse } from '../types/auth'
+import type { LoginPayload } from '../types/auth'
 import type { User } from '../types/user'
 
 const TOKEN_KEY = 'idesignlab_token'
 const USER_KEY = 'idesignlab_user'
 
-export type AuthUser = Partial<User> & {
-  account?: string
-}
+export type AuthUser = User
 
 const getStoredUser = (): AuthUser | null => {
   const raw = localStorage.getItem(USER_KEY)
@@ -23,16 +21,9 @@ const getStoredUser = (): AuthUser | null => {
   }
 }
 
-const mapLoginResponseToUser = (response: LoginResponse): AuthUser => ({
-  name: response.name,
-  account: response.account,
-  phone: response.phone,
-  role: response.role,
-})
-
 export const useAuthStore = defineStore('auth', () => {
   const token = ref<string | null>(localStorage.getItem(TOKEN_KEY))
-  const user = ref<AuthUser | null>(getStoredUser())
+const user = ref<AuthUser | null>(getStoredUser())
   const loading = ref(false)
   const profileLoading = ref(false)
   const hasFetchedProfile = ref(false)
@@ -46,7 +37,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  const setUser = (value: AuthUser | null) => {
+const setUser = (value: AuthUser | null) => {
     user.value = value
     if (value) {
       localStorage.setItem(USER_KEY, JSON.stringify(value))
@@ -88,7 +79,7 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const response = await loginRequest(payload)
       setToken(response.token)
-      setUser(mapLoginResponseToUser(response))
+      setUser(null)
       hasFetchedProfile.value = false
       await fetchCurrentUser(true)
       return response

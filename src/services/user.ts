@@ -11,12 +11,14 @@ import type {
 
 const scopedUserPath = (scope: ManagementScope, path: string) => `/${scope}${path}`
 
-export const getCurrentUser = async () => {
+export const getCurrentUser = async (): Promise<ApiResponse<User>> => {
   const { data } = await http.get<CurrentUserResponse>('/user/current')
-  return data
+  return {
+    code: data.code,
+    message: data.message,
+    data: data.data,
+  }
 }
-
-export const mapCurrentUser = (response: CurrentUserResponse): User => response.data
 
 export const getManagedUsers = async (scope: ManagementScope) => {
   const { data } = await http.get<ManagedUsersResponse>(scopedUserPath(scope, '/users'))

@@ -32,19 +32,21 @@ const menuItems = computed(() => {
 })
 
 const roleDisplay = computed(() => {
-  const role = currentUser.value?.role
-  if (!role) return '未识别角色'
+  const role = currentUser.value?.Role
   const map: Record<string, string> = {
     admin: '管理员',
     teacher: '教师',
     student: '学生',
     temporary: '临时用户',
   }
-  return map[role] ?? role
+  if (role && map[role]) return map[role]
+  return '未知角色'
 })
 
+const displayName = computed(() => currentUser.value?.Name || '访客用户')
+
 const userInitials = computed(() => {
-  const name = currentUser.value?.name ?? ''
+  const name = currentUser.value?.Name ?? ''
   if (!name) return '访客'
   return name.length === 1 ? name : name.slice(0, 2)
 })
@@ -81,7 +83,7 @@ const handleLogout = () => {
       <footer class="sidebar-footer" v-if="currentUser">
         <div class="user-meta">
           <el-avatar class="user-avatar" :size="40">
-            <template v-if="currentUser?.name">
+            <template v-if="currentUser?.Name">
               {{ userInitials }}
             </template>
             <template v-else>
@@ -89,7 +91,7 @@ const handleLogout = () => {
             </template>
           </el-avatar>
           <div class="user-info">
-            <span class="user-name">{{ currentUser?.name ?? '访客用户' }}</span>
+            <span class="user-name">{{ displayName }}</span>
             <span class="user-role">{{ roleDisplay }}</span>
           </div>
         </div>

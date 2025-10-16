@@ -3,16 +3,18 @@ export type UserStatus = 'pending' | 'approved' | 'rejected' | 'banned'
 export type ManagementScope = 'admin' | 'teacher'
 
 export interface User {
-  id: number
-  name: string
-  account: string
-  phone: string
-  role: UserRole
-  status: UserStatus
-  grade?: string
-  purpose?: string
-  created_at?: string
-  updated_at?: string
+  ID: number
+  Name: string
+  Account: string
+  Phone: string
+  Role: UserRole
+  Status: UserStatus
+  Purpose?: string
+  Grade?: string
+  CreatedAt?: string
+  UpdatedAt?: string
+  DeletedAt?: string | null
+  Password?: string
 }
 
 export interface CurrentUserResponse {
