@@ -3,6 +3,12 @@ import { computed, onMounted, reactive, ref } from "vue";
 import dayjs from "dayjs";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { getReservations, cancelReservation } from "../services/reservations";
+import {
+  TIME_SLOT_OPTIONS,
+  getTimeSlotLabel,
+  RESERVATION_STATUS_OPTIONS,
+  getReservationStatusMeta,
+} from "../constants/reservations";
 import type {
   Reservation,
   ReservationQuery,
@@ -26,37 +32,11 @@ const filters = reactive({
   participant_account: "",
 });
 
-const timeSlotOptions: Array<{ label: string; value: TimeSlot }> = [
-  { label: "09:00-10:30", value: "morning" },
-  { label: "10:30-12:00", value: "noon" },
-  { label: "13:00-14:30", value: "afternoon" },
-  { label: "14:30-16:00", value: "evening" },
-];
+const timeSlotOptions = TIME_SLOT_OPTIONS;
+const statusOptions = RESERVATION_STATUS_OPTIONS;
 
-const statusOptions: Array<{ label: string; value: ReservationStatus }> = [
-  { label: "待开始", value: "pending" },
-  { label: "进行中", value: "in_progress" },
-  { label: "已完成", value: "completed" },
-  { label: "已取消", value: "cancelled" },
-  { label: "已违规", value: "violated" },
-];
-
-const statusTagType = (status: ReservationStatus) => {
-  switch (status) {
-    case "pending":
-      return "warning";
-    case "in_progress":
-      return "success";
-    case "completed":
-      return "info";
-    case "cancelled":
-      return "";
-    case "violated":
-      return "danger";
-    default:
-      return "";
-  }
-};
+const statusTagType = (status: ReservationStatus) =>
+  getReservationStatusMeta(status)?.tagType ?? "info";
 
 const canCancel = (reservation: Reservation) =>
   reservation.status === "pending";
@@ -135,10 +115,7 @@ const handleCancelReservation = (row: Reservation) => {
     .catch(() => {});
 };
 
-const timeSlotLabel = (value?: TimeSlot | "") => {
-  if (!value) return "—";
-  return timeSlotOptions.find((item) => item.value === value)?.label ?? value;
-};
+const timeSlotLabel = getTimeSlotLabel;
 
 const reservationSummary = computed(() => {
   const total = reservations.value.length;

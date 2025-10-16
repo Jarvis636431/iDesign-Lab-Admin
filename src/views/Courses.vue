@@ -1,241 +1,237 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
-import dayjs from 'dayjs'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { computed, onMounted, reactive, ref } from "vue";
+import dayjs from "dayjs";
+import { ElMessage, ElMessageBox } from "element-plus";
 import {
   getCourses,
   createCourse,
   deleteCourseById,
   deleteCourseByCriteria,
-} from '../services/courses'
-import type {
-  Course,
-  CourseQuery,
-  CreateCoursePayload,
-} from '../types/course'
-import type { TimeSlot } from '../types/reservation'
+} from "../services/courses";
+import {
+  TIME_SLOT_OPTIONS,
+  getTimeSlotLabel,
+} from "../constants/reservations";
+import type { Course, CourseQuery, CreateCoursePayload } from "../types/course";
+import type { TimeSlot } from "../types/reservation";
 
-type DateRange = [Date, Date]
+type DateRange = [Date, Date];
 
-const loading = ref(false)
-const submitting = ref(false)
-const courses = ref<Course[]>([])
+const loading = ref(false);
+const submitting = ref(false);
+const courses = ref<Course[]>([]);
 const pagination = reactive({
   page: 1,
   size: 10,
   total: 0,
-})
+});
 
 const filters = reactive({
-  room_id: '',
-  time_slot: '' as TimeSlot | '',
+  room_id: "",
+  time_slot: "" as TimeSlot | "",
   dateRange: [] as DateRange | [],
-})
+});
 
-const createDialogVisible = ref(false)
+const createDialogVisible = ref(false);
 const createForm = reactive({
-  room_id: '',
-  date: '',
-  time_slot: '' as TimeSlot | '',
-  reason: '',
-})
+  room_id: "",
+  date: "",
+  time_slot: "" as TimeSlot | "",
+  reason: "",
+});
 
-const timeSlotOptions: Array<{ label: string; value: TimeSlot }> = [
-  { label: '上午 · 09:00-10:30', value: 'morning' },
-  { label: '中午 · 10:30-12:00', value: 'noon' },
-  { label: '下午 · 13:00-14:30', value: 'afternoon' },
-  { label: '傍晚 · 14:30-16:00', value: 'evening' },
-]
+const timeSlotOptions = TIME_SLOT_OPTIONS;
 
-const timeSlotLabel = (value?: TimeSlot | '') =>
-  timeSlotOptions.find((item) => item.value === value)?.label ?? value ?? '—'
+const timeSlotLabel = getTimeSlotLabel;
 
 const buildQuery = (): CourseQuery => {
   const query: CourseQuery = {
     page: pagination.page,
     size: pagination.size,
-  }
+  };
 
   if (filters.room_id) {
-    query.room_id = Number(filters.room_id)
+    query.room_id = Number(filters.room_id);
   }
 
   if (filters.time_slot) {
-    query.time_slot = filters.time_slot as TimeSlot
+    query.time_slot = filters.time_slot as TimeSlot;
   }
 
   if (filters.dateRange.length === 2) {
-    const [start, end] = filters.dateRange
-    query.start_date = dayjs(start).format('YYYY-MM-DD')
-    query.end_date = dayjs(end).format('YYYY-MM-DD')
+    const [start, end] = filters.dateRange;
+    query.start_date = dayjs(start).format("YYYY-MM-DD");
+    query.end_date = dayjs(end).format("YYYY-MM-DD");
   }
 
-  return query
-}
+  return query;
+};
 
 const fetchCourses = async () => {
-  loading.value = true
+  loading.value = true;
   try {
-    const response = await getCourses(buildQuery())
-    courses.value = response.data
+    const response = await getCourses(buildQuery());
+    courses.value = response.data;
     if (response.pagination) {
-      pagination.total = response.pagination.total
-      pagination.page = response.pagination.page
-      pagination.size = response.pagination.size
+      pagination.total = response.pagination.total;
+      pagination.page = response.pagination.page;
+      pagination.size = response.pagination.size;
     }
   } catch (error) {
-    ElMessage.error('获取课程列表失败，请稍后重试')
+    ElMessage.error("获取课程列表失败，请稍后重试");
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 const handleSearch = () => {
-  pagination.page = 1
-  fetchCourses()
-}
+  pagination.page = 1;
+  fetchCourses();
+};
 
 const handleReset = () => {
-  filters.room_id = ''
-  filters.time_slot = ''
-  filters.dateRange = []
-  pagination.page = 1
-  fetchCourses()
-}
+  filters.room_id = "";
+  filters.time_slot = "";
+  filters.dateRange = [];
+  pagination.page = 1;
+  fetchCourses();
+};
 
 const handlePageChange = (page: number) => {
-  pagination.page = page
-  fetchCourses()
-}
+  pagination.page = page;
+  fetchCourses();
+};
 
 const handlePageSizeChange = (size: number) => {
-  pagination.size = size
-  pagination.page = 1
-  fetchCourses()
-}
+  pagination.size = size;
+  pagination.page = 1;
+  fetchCourses();
+};
 
 const validateCreateForm = () => {
   if (!createForm.room_id.trim()) {
-    ElMessage.warning('请填写教室编号')
-    return false
+    ElMessage.warning("请填写教室编号");
+    return false;
   }
   if (!createForm.date) {
-    ElMessage.warning('请选择日期')
-    return false
+    ElMessage.warning("请选择日期");
+    return false;
   }
   if (!createForm.time_slot) {
-    ElMessage.warning('请选择时间段')
-    return false
+    ElMessage.warning("请选择时间段");
+    return false;
   }
   if (!createForm.reason.trim()) {
-    ElMessage.warning('请填写课程说明')
-    return false
+    ElMessage.warning("请填写课程说明");
+    return false;
   }
-  return true
-}
+  return true;
+};
 
 const handleCreateCourse = async () => {
-  if (!validateCreateForm()) return
+  if (!validateCreateForm()) return;
 
-  submitting.value = true
+  submitting.value = true;
   try {
     const payload: CreateCoursePayload = {
       room_id: Number(createForm.room_id),
-      date: dayjs(createForm.date).format('YYYY-MM-DD'),
+      date: dayjs(createForm.date).format("YYYY-MM-DD"),
       time_slot: createForm.time_slot as TimeSlot,
       reason: createForm.reason.trim(),
-    }
-    await createCourse(payload)
-    ElMessage.success('课程创建成功')
-    createDialogVisible.value = false
-    handleResetCreateForm()
-    fetchCourses()
+    };
+    await createCourse(payload);
+    ElMessage.success("课程创建成功");
+    createDialogVisible.value = false;
+    handleResetCreateForm();
+    fetchCourses();
   } catch (error) {
-    ElMessage.error('课程创建失败，请检查数据或稍后再试')
+    ElMessage.error("课程创建失败，请检查数据或稍后再试");
   } finally {
-    submitting.value = false
+    submitting.value = false;
   }
-}
+};
 
 const handleDeleteCourse = (course: Course) => {
   ElMessageBox.confirm(
-    `确认删除 ${course.date.slice(0, 10)} ${timeSlotLabel(course.time_slot)} 在教室 ${course.room_id} 的课程吗？`,
-    '删除课程',
+    `确认删除 ${course.date.slice(0, 10)} ${timeSlotLabel(
+      course.time_slot
+    )} 在教室 ${course.room_id} 的课程吗？`,
+    "删除课程",
     {
-      confirmButtonText: '确认删除',
-      cancelButtonText: '取消',
-      type: 'warning',
+      confirmButtonText: "确认删除",
+      cancelButtonText: "取消",
+      type: "warning",
     }
   )
     .then(async () => {
       try {
-        await deleteCourseById(course.ID)
-        ElMessage.success('课程删除成功')
-        fetchCourses()
+        await deleteCourseById(course.ID);
+        ElMessage.success("课程删除成功");
+        fetchCourses();
       } catch (error) {
-        ElMessage.error('课程删除失败，请稍后重试')
+        ElMessage.error("课程删除失败，请稍后重试");
       }
     })
-    .catch(() => {})
-}
+    .catch(() => {});
+};
 
 const handleDeleteByCriteria = () => {
   ElMessageBox.prompt(
-    '请输入需要删除课程的「教室编号、日期、时间段」（格式：10005,2025-10-20,afternoon）',
-    '按条件删除',
+    "请输入需要删除课程的「教室编号、日期、时间段」（格式：10005,2025-10-20,afternoon）",
+    "按条件删除",
     {
-      confirmButtonText: '删除',
-      cancelButtonText: '取消',
-      inputPlaceholder: '教室编号,日期,时间段',
+      confirmButtonText: "删除",
+      cancelButtonText: "取消",
+      inputPlaceholder: "教室编号,日期,时间段",
     }
   )
     .then(async ({ value }) => {
-      const parts = value.split(',').map((item) => item.trim())
+      const parts = value.split(",").map((item) => item.trim());
       if (parts.length !== 3) {
-        ElMessage.warning('输入格式不正确，请重新输入')
-        return
+        ElMessage.warning("输入格式不正确，请重新输入");
+        return;
       }
-      const [room, date, slot] = parts as [string, string, string]
+      const [room, date, slot] = parts as [string, string, string];
       try {
         await deleteCourseByCriteria({
           room_id: Number(room),
           date,
           time_slot: slot as TimeSlot,
-        })
-        ElMessage.success('课程删除成功')
-        fetchCourses()
+        });
+        ElMessage.success("课程删除成功");
+        fetchCourses();
       } catch (error) {
-        ElMessage.error('按照条件删除课程失败，请稍后重试')
+        ElMessage.error("按照条件删除课程失败，请稍后重试");
       }
     })
-    .catch(() => {})
-}
+    .catch(() => {});
+};
 
 const handleResetCreateForm = () => {
-  createForm.room_id = ''
-  createForm.date = ''
-  createForm.time_slot = ''
-  createForm.reason = ''
-}
+  createForm.room_id = "";
+  createForm.date = "";
+  createForm.time_slot = "";
+  createForm.reason = "";
+};
 
 const formatDate = (value?: string | null) => {
-  if (!value) return '—'
-  const parsed = dayjs(value)
-  return parsed.isValid() ? parsed.format('YYYY-MM-DD') : '—'
-}
+  if (!value) return "—";
+  const parsed = dayjs(value);
+  return parsed.isValid() ? parsed.format("YYYY-MM-DD") : "—";
+};
 
 const courseStats = computed(() => {
-  const total = pagination.total
+  const total = pagination.total;
   const today = courses.value.filter((item) =>
-    dayjs(item.date).isSame(dayjs(), 'day')
-  ).length
-  const uniqueRooms = new Set(courses.value.map((item) => item.room_id)).size
-  return { total, today, uniqueRooms }
-})
+    dayjs(item.date).isSame(dayjs(), "day")
+  ).length;
+  const uniqueRooms = new Set(courses.value.map((item) => item.room_id)).size;
+  return { total, today, uniqueRooms };
+});
 
 onMounted(() => {
-  fetchCourses()
-})
+  fetchCourses();
+});
 </script>
 
 <template>
@@ -318,7 +314,12 @@ onMounted(() => {
       <template #header>
         <div class="table-header">
           <span>课程列表</span>
-          <el-button type="primary" link :loading="loading" @click="fetchCourses">
+          <el-button
+            type="primary"
+            link
+            :loading="loading"
+            @click="fetchCourses"
+          >
             刷新
           </el-button>
         </div>
@@ -418,7 +419,11 @@ onMounted(() => {
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="createDialogVisible = false">取消</el-button>
-          <el-button type="primary" :loading="submitting" @click="handleCreateCourse">
+          <el-button
+            type="primary"
+            :loading="submitting"
+            @click="handleCreateCourse"
+          >
             确认创建
           </el-button>
         </span>
