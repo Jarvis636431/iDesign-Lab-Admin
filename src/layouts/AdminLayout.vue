@@ -1,11 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { RouterView, useRoute, useRouter } from 'vue-router'
-import {
-  Odometer,
-  Tickets,
-  UserFilled,
-} from '@element-plus/icons-vue'
+import { Odometer, Tickets, UserFilled, Avatar } from '@element-plus/icons-vue'
 import { useAuthStore } from '../stores/auth'
 import { storeToRefs } from 'pinia'
 
@@ -33,6 +29,24 @@ const menuItems = computed(() => {
       icon: Tickets,
     },
   ]
+})
+
+const roleDisplay = computed(() => {
+  const role = currentUser.value?.role
+  if (!role) return '未识别角色'
+  const map: Record<string, string> = {
+    admin: '管理员',
+    teacher: '教师',
+    student: '学生',
+    temporary: '临时用户',
+  }
+  return map[role] ?? role
+})
+
+const userInitials = computed(() => {
+  const name = currentUser.value?.name ?? ''
+  if (!name) return '访客'
+  return name.length === 1 ? name : name.slice(0, 2)
 })
 
 const handleLogout = () => {
@@ -66,12 +80,17 @@ const handleLogout = () => {
       </el-menu>
       <footer class="sidebar-footer" v-if="currentUser">
         <div class="user-meta">
-          <div class="user-avatar">
-            {{ currentUser.name?.[0] ?? currentUser.name ?? '访客' }}
-          </div>
+          <el-avatar class="user-avatar" :size="40">
+            <template v-if="currentUser?.name">
+              {{ userInitials }}
+            </template>
+            <template v-else>
+              <Avatar />
+            </template>
+          </el-avatar>
           <div class="user-info">
-            <span class="user-name">{{ currentUser.name ?? '访客用户' }}</span>
-            <span class="user-role">{{ currentUser.role ?? '管理员' }}</span>
+            <span class="user-name">{{ currentUser?.name ?? '访客用户' }}</span>
+            <span class="user-role">{{ roleDisplay }}</span>
           </div>
         </div>
         <el-button
@@ -146,19 +165,6 @@ const handleLogout = () => {
   gap: 0.75rem;
 }
 
-.user-avatar {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.2);
-  color: #fff;
-  font-weight: 600;
-  text-transform: uppercase;
-}
-
 .user-info {
   display: flex;
   flex-direction: column;
@@ -183,3 +189,6 @@ const handleLogout = () => {
   background-color: #f5f7fa;
 }
 </style>
+.user-avatar :deep(.el-avatar__inner) {
+  font-weight: 600;
+}

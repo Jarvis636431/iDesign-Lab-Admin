@@ -33,6 +33,12 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../views/Login.vue'),
     meta: { public: true, title: '登录' },
   },
+  {
+    path: '/register',
+    name: 'Register',
+    component: () => import('../views/Register.vue'),
+    meta: { public: true, title: '注册' },
+  },
 ]
 
 const router = createRouter({
@@ -41,8 +47,21 @@ const router = createRouter({
   scrollBehavior: () => ({ left: 0, top: 0 }),
 })
 
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
   const authStore = useAuthStore()
+
+  if (authStore.token) {
+    try {
+      await authStore.fetchCurrentUser()
+    } catch (error) {
+      if (!to.meta.public) {
+        return {
+          path: '/login',
+          query: to.fullPath !== '/' ? { redirect: to.fullPath } : undefined,
+        }
+      }
+    }
+  }
 
   if (!authStore.isAuthenticated && !to.meta.public) {
     return {
@@ -51,7 +70,7 @@ router.beforeEach((to) => {
     }
   }
 
-  if (authStore.isAuthenticated && to.path === '/login') {
+  if (authStore.isAuthenticated && ['/login', '/register'].includes(to.path)) {
     return { path: '/' }
   }
 

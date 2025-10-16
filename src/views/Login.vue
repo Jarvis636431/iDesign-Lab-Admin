@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import type { AxiosError } from 'axios'
@@ -17,6 +17,12 @@ const form = reactive({
 })
 
 const formError = ref<string | null>(null)
+
+onMounted(() => {
+  if (typeof route.query.account === 'string') {
+    form.account = route.query.account
+  }
+})
 
 const validateForm = () => {
   if (!form.account.trim()) {
@@ -93,6 +99,11 @@ const handleSubmit = async () => {
           </el-button>
         </el-form-item>
       </el-form>
+      <footer class="login-footer">
+        <router-link class="login-link" to="/register">
+          还没有账号？立即注册
+        </router-link>
+      </footer>
     </el-card>
   </section>
 </template>
@@ -147,5 +158,18 @@ const handleSubmit = async () => {
 
 .form-error {
   margin-bottom: 0.5rem;
+}
+
+.login-footer {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.login-link {
+  color: #409eff;
+  font-size: 0.95rem;
+}
+.login-link:hover {
+  color: #66b1ff;
 }
 </style>
