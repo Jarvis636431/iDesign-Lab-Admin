@@ -119,7 +119,7 @@ const handleCancelReservation = (row: Reservation) => {
   })
     .then(async () => {
       try {
-        await cancelReservation(row.id)
+        await cancelReservation(row.ID)
         ElMessage.success('预约已取消')
         fetchReservations()
       } catch (error) {
@@ -264,7 +264,7 @@ onMounted(() => {
         v-loading="loading"
         empty-text="暂无预约记录"
       >
-        <el-table-column prop="id" label="ID" width="80" sortable />
+        <el-table-column prop="ID" label="ID" width="80" sortable />
         <el-table-column label="预约信息" min-width="220">
           <template #default="{ row }">
             <div class="cell-main">

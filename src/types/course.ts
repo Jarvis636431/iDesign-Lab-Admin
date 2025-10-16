@@ -2,7 +2,7 @@ import type { ApiResponse, PaginatedResponse } from './common'
 import type { TimeSlot } from './reservation'
 
 export interface Course {
-  id: number
+  ID: number
   created_at: string
   updated_at: string
   deleted_at: string | null

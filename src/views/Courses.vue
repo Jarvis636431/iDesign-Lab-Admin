@@ -169,7 +169,7 @@ const handleDeleteCourse = (course: Course) => {
   )
     .then(async () => {
       try {
-        await deleteCourseById(course.id)
+        await deleteCourseById(course.ID)
         ElMessage.success('课程删除成功')
         fetchCourses()
       } catch (error) {
@@ -337,7 +337,7 @@ onMounted(() => {
         v-loading="loading"
         empty-text="暂无课程安排"
       >
-        <el-table-column prop="id" label="ID" width="80" sortable />
+        <el-table-column prop="ID" label="ID" width="80" sortable />
         <el-table-column label="课程安排" min-width="240">
           <template #default="{ row }">
             <div class="cell-main">

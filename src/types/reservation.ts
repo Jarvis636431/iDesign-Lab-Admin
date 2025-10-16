@@ -11,7 +11,7 @@ export interface ReservationParticipant {
 }
 
 export interface Reservation {
-  id: number
+  ID: number
   created_at: string
   updated_at: string
   deleted_at: string | null
