@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
+import { useAuthStore } from '../stores/auth'
 import AdminLayout from '../layouts/AdminLayout.vue'
 
 const routes: RouteRecordRaw[] = [
@@ -38,6 +39,27 @@ const router = createRouter({
   history: createWebHistory(),
   routes,
   scrollBehavior: () => ({ left: 0, top: 0 }),
+})
+
+router.beforeEach((to) => {
+  const authStore = useAuthStore()
+
+  if (!authStore.isAuthenticated && !to.meta.public) {
+    return {
+      path: '/login',
+      query: to.fullPath !== '/' ? { redirect: to.fullPath } : undefined,
+    }
+  }
+
+  if (authStore.isAuthenticated && to.path === '/login') {
+    return { path: '/' }
+  }
+
+  if (to.meta.title && typeof document !== 'undefined') {
+    document.title = `${to.meta.title} · iDesignLab Admin`
+  }
+
+  return true
 })
 
 export default router

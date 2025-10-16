@@ -1,31 +1,44 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { RouterView, useRoute } from 'vue-router'
+import { RouterView, useRoute, useRouter } from 'vue-router'
 import {
   Odometer,
   Tickets,
   UserFilled,
 } from '@element-plus/icons-vue'
+import { useAuthStore } from '../stores/auth'
+import { storeToRefs } from 'pinia'
 
 const route = useRoute()
+const router = useRouter()
+const authStore = useAuthStore()
+const { user: currentUser, isAuthenticated } = storeToRefs(authStore)
 
-const menuItems = computed(() => [
-  {
-    label: '仪表盘',
-    path: '/',
-    icon: Odometer,
-  },
-  {
-    label: '用户管理',
-    path: '/users',
-    icon: UserFilled,
-  },
-  {
-    label: '工单管理',
-    path: '/tickets',
-    icon: Tickets,
-  },
-])
+const menuItems = computed(() => {
+  if (!isAuthenticated.value) return []
+  return [
+    {
+      label: '仪表盘',
+      path: '/',
+      icon: Odometer,
+    },
+    {
+      label: '用户管理',
+      path: '/users',
+      icon: UserFilled,
+    },
+    {
+      label: '工单管理',
+      path: '/tickets',
+      icon: Tickets,
+    },
+  ]
+})
+
+const handleLogout = () => {
+  authStore.logout()
+  router.push({ path: '/login' })
+}
 </script>
 
 <template>
@@ -51,6 +64,26 @@ const menuItems = computed(() => [
           <span>{{ item.label }}</span>
         </el-menu-item>
       </el-menu>
+      <footer class="sidebar-footer" v-if="currentUser">
+        <div class="user-meta">
+          <div class="user-avatar">
+            {{ currentUser.name?.[0] ?? currentUser.name ?? '访客' }}
+          </div>
+          <div class="user-info">
+            <span class="user-name">{{ currentUser.name ?? '访客用户' }}</span>
+            <span class="user-role">{{ currentUser.role ?? '管理员' }}</span>
+          </div>
+        </div>
+        <el-button
+          class="logout-btn"
+          type="primary"
+          plain
+          size="small"
+          @click="handleLogout"
+        >
+          退出登录
+        </el-button>
+      </footer>
     </el-aside>
     <el-main class="admin-main">
       <RouterView />
@@ -97,6 +130,52 @@ const menuItems = computed(() => [
   flex: 1;
   border-right: none;
   background: transparent;
+}
+
+.sidebar-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.user-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.user-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.user-name {
+  font-weight: 600;
+}
+
+.user-role {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.logout-btn {
+  align-self: stretch;
 }
 
 .admin-main {
