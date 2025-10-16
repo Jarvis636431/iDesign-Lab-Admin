@@ -5,6 +5,10 @@ import { ElMessage } from 'element-plus'
 import { useAuthStore } from '../stores/auth'
 import { getReservations } from '../services/reservations'
 import { getCourses } from '../services/courses'
+import {
+  getReservationStatusMeta,
+  getTimeSlotLabel,
+} from '../constants/reservations'
 import type { Reservation } from '../types/reservation'
 import type { Course } from '../types/course'
 
@@ -155,7 +159,7 @@ onMounted(() => {
                 <div class="timeline-meta">
                   <span>日期：{{ formatDate(item.date) }}</span>
                   <span>教室：{{ item.room_id }}</span>
-                  <span>状态：{{ item.status }}</span>
+                  <span>状态：{{ getReservationStatusMeta(item.status)?.label ?? item.status }}</span>
                 </div>
               </div>
             </el-timeline-item>
@@ -174,7 +178,7 @@ onMounted(() => {
             </el-table-column>
             <el-table-column label="时间段" width="160">
               <template #default="{ row }">
-                {{ row.time_slot }}
+                {{ getTimeSlotLabel(row.time_slot) }}
               </template>
             </el-table-column>
             <el-table-column prop="room_id" label="教室" width="100" />

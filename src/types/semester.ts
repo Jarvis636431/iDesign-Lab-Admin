@@ -1,7 +1,7 @@
 import type { ApiResponse, PaginatedResponse } from './common'
 
 export interface Semester {
-  id: number
+  ID: number
   name: string
   start_date: string
   end_date: string

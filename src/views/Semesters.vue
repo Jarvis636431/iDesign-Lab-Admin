@@ -147,7 +147,7 @@ const handleSubmit = async () => {
   }
   try {
     if (editingSemester.value) {
-      await updateSemester(editingSemester.value.id, payload)
+      await updateSemester(editingSemester.value.ID, payload)
       ElMessage.success('学期更新成功')
     } else {
       await createSemester(payload)
@@ -180,7 +180,7 @@ const handleSetActive = async (semester: Semester) => {
 
   submitting.value = true
   try {
-    await updateSemester(semester.id, { is_active: true })
+    await updateSemester(semester.ID, { is_active: true })
     ElMessage.success('当前学期已更新')
     fetchSemesters()
     fetchCurrentSemester()
@@ -267,7 +267,7 @@ onMounted(() => {
         </div>
       </template>
       <el-table :data="tableData" border stripe v-loading="loading" empty-text="暂无学期数据">
-        <el-table-column prop="id" label="ID" width="80" />
+        <el-table-column prop="ID" label="ID" width="80" />
         <el-table-column prop="name" label="名称" min-width="180" />
         <el-table-column label="时间范围" min-width="220">
           <template #default="{ row }">
