@@ -11,6 +11,8 @@ import {
   ArrowDown,
   Setting,
   User,
+  Expand,
+  Fold,
 } from '@element-plus/icons-vue'
 import { ElMessageBox, ElDropdown } from 'element-plus'
 import { useAuthStore } from '../stores/auth'
@@ -73,13 +75,6 @@ const roleDisplay = computed(() => {
 
 const displayName = computed(() => currentUser.value?.Name || '访客用户')
 
-const userInitials = computed(() => {
-  const name = currentUser.value?.Name ?? ''
-  if (!name) return '访客'
-  return name.length === 1 ? name : name.slice(0, 2)
-})
-
-
 const handleLogout = () => {
   ElMessageBox.confirm('确认退出当前账号吗？', '退出登录', {
     confirmButtonText: '确认',
@@ -108,11 +103,11 @@ const goToSettings = () => {
 
 <template>
   <el-container class="admin-layout">
-    <el-aside width="220px" class="admin-sidebar">
+    <el-aside :width="isSidebarCollapsed ? '64px' : '220px'" class="admin-sidebar">
       <div class="sidebar-brand">
         <div class="brand-info">
           <img :src="brandLogo" alt="iDesign Lab" class="brand-logo" />
-          <div class="brand-text">
+          <div class="brand-text" v-show="!isSidebarCollapsed">
             <span class="brand-mark">iDesign Lab</span>
             <span class="brand-sub">实验室管理系统</span>
           </div>
@@ -127,15 +122,16 @@ const goToSettings = () => {
           v-for="item in menuItems"
           :key="item.path"
           :index="item.path"
+          :class="isSidebarCollapsed ? 'collapsed' : ''"
         >
           <el-icon>
             <component :is="item.icon" />
           </el-icon>
-          <span>{{ item.label }}</span>
+          <span v-if="!isSidebarCollapsed">{{ item.label }}</span>
         </el-menu-item>
       </el-menu>
       <footer class="sidebar-footer" v-if="currentUser">
-        <div class="user-dropdown-container">
+        <div class="user-section" v-show="!isSidebarCollapsed">
           <el-dropdown 
             class="user-dropdown" 
             :hide-on-click="true"
@@ -143,8 +139,7 @@ const goToSettings = () => {
           >
             <div class="user-trigger">
               <div class="user-details">
-                <div class="user-name">{{ displayName }}</div>
-                <div class="user-role">{{ roleDisplay }}</div>
+                <div class="user-name-role">{{ displayName }} ({{ roleDisplay }})</div>
               </div>
               <el-icon class="arrow-icon">
                 <ArrowDown />
@@ -165,6 +160,14 @@ const goToSettings = () => {
             </template>
           </el-dropdown>
         </div>
+        
+        <el-button 
+          class="collapse-btn"
+          :icon="isSidebarCollapsed ? Expand : Fold"
+          @click="toggleSidebar"
+          text
+          size="large"
+        />
       </footer>
     </el-aside>
     <el-main class="admin-main">
@@ -194,7 +197,6 @@ const goToSettings = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
   padding: 0 1.25rem 1.5rem;
 }
 
@@ -202,6 +204,8 @@ const goToSettings = () => {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  justify-content: center;
+  width: 100%;
 }
 
 .brand-logo {
@@ -244,12 +248,24 @@ const goToSettings = () => {
 .sidebar-menu :deep(.el-menu-item) {
   color: rgba(255, 255, 255, 0.9);
   border-radius: 10px;
-  margin: 0 12px;
+  margin: 8px 12px;
   height: 44px;
   line-height: 44px;
   display: flex;
   align-items: center;
   gap: 12px;
+  justify-content: flex-start;
+  padding: 0 16px;
+}
+
+.sidebar-menu :deep(.el-menu-item.collapsed) {
+  justify-content: center;
+  padding: 0;
+}
+
+.sidebar-menu :deep(.el-menu-item span) {
+  flex: 1;
+  text-align: left;
 }
 
 .sidebar-menu :deep(.el-menu-item .el-icon) {
@@ -262,32 +278,21 @@ const goToSettings = () => {
 }
 
 .sidebar-menu :deep(.el-menu-item.is-active) {
-  background: linear-gradient(90deg, rgba(64, 158, 255, 0.32), rgba(64, 158, 255, 0.14));
+  background-color: rgba(64, 158, 255, 0.2);
   color: #fff;
-  position: relative;
-}
-
-.sidebar-menu :deep(.el-menu-item.is-active::before) {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 10px;
-  bottom: 10px;
-  width: 3px;
-  border-radius: 2px;
-  background: #409eff;
 }
 
 .sidebar-footer {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 0.75rem;
   padding: 1.25rem 1.25rem 1rem;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.user-dropdown-container {
-  width: 100%;
+.user-section {
+  flex: 1;
 }
 
 .user-trigger {
@@ -309,6 +314,22 @@ const goToSettings = () => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+
+.collapse-btn {
+  color: rgba(255, 255, 255, 0.8);
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: all 0.3s;
+}
+
+.collapse-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.collapse-btn:active {
+  transform: scale(0.95);
 }
 
 .user-name {
