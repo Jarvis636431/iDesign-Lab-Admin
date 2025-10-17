@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { RouterView, useRoute, useRouter } from 'vue-router'
 import {
   Odometer,
@@ -8,9 +8,11 @@ import {
   Collection,
   Timer,
   OfficeBuilding,
-  Avatar,
+  ArrowDown,
+  Setting,
+  User,
 } from '@element-plus/icons-vue'
-import { ElMessageBox } from 'element-plus'
+import { ElMessageBox, ElDropdown } from 'element-plus'
 import { useAuthStore } from '../stores/auth'
 import { storeToRefs } from 'pinia'
 
@@ -19,6 +21,7 @@ const router = useRouter()
 const authStore = useAuthStore()
 const { user: currentUser, isAuthenticated } = storeToRefs(authStore)
 const brandLogo = new URL('../assets/logo.png', import.meta.url).href
+const isSidebarCollapsed = ref(false)
 
 const menuItems = computed(() => {
   if (!isAuthenticated.value) return []
@@ -76,6 +79,7 @@ const userInitials = computed(() => {
   return name.length === 1 ? name : name.slice(0, 2)
 })
 
+
 const handleLogout = () => {
   ElMessageBox.confirm('确认退出当前账号吗？', '退出登录', {
     confirmButtonText: '确认',
@@ -87,6 +91,18 @@ const handleLogout = () => {
       router.push({ path: '/login' })
     })
     .catch(() => {})
+}
+
+const toggleSidebar = () => {
+  isSidebarCollapsed.value = !isSidebarCollapsed.value
+}
+
+const goToProfile = () => {
+  router.push('/profile')
+}
+
+const goToSettings = () => {
+  router.push('/settings')
 }
 </script>
 
@@ -119,21 +135,36 @@ const handleLogout = () => {
         </el-menu-item>
       </el-menu>
       <footer class="sidebar-footer" v-if="currentUser">
-        <el-avatar class="user-avatar" :size="48">
-          <template v-if="currentUser?.Name">
-            {{ userInitials }}
-          </template>
-          <template v-else>
-            <Avatar />
-          </template>
-        </el-avatar>
-        <div class="user-info">
-          <span class="user-name">{{ displayName }}</span>
-          <span class="user-role">{{ roleDisplay }}</span>
+        <div class="user-dropdown-container">
+          <el-dropdown 
+            class="user-dropdown" 
+            :hide-on-click="true"
+            trigger="click"
+          >
+            <div class="user-trigger">
+              <div class="user-details">
+                <div class="user-name">{{ displayName }}</div>
+                <div class="user-role">{{ roleDisplay }}</div>
+              </div>
+              <el-icon class="arrow-icon">
+                <ArrowDown />
+              </el-icon>
+            </div>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item :icon="User" @click="goToProfile">
+                  个人资料
+                </el-dropdown-item>
+                <el-dropdown-item :icon="Setting" @click="goToSettings">
+                  设置
+                </el-dropdown-item>
+                <el-dropdown-item divided @click="handleLogout" :icon="UserFilled">
+                  退出登录
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
         </div>
-        <el-button type="primary" plain size="small" class="logout-btn" @click="handleLogout">
-          退出登录
-        </el-button>
       </footer>
     </el-aside>
     <el-main class="admin-main">
@@ -255,23 +286,49 @@ const handleLogout = () => {
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.sidebar-footer.collapsed {
-  justify-content: center;
+.user-dropdown-container {
+  width: 100%;
 }
 
-.user-info {
+.user-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.user-trigger:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.user-details {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  overflow: hidden;
 }
 
 .user-name {
   font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .user-role {
   font-size: 0.75rem;
   color: rgba(255, 255, 255, 0.7);
+}
+
+.arrow-icon {
+  transition: transform 0.3s;
+}
+
+.user-trigger:hover .arrow-icon {
+  transform: rotate(180deg);
 }
 
 .admin-main {
