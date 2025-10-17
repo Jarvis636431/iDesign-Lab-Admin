@@ -8,9 +8,7 @@ import {
   Collection,
   Timer,
   OfficeBuilding,
-  ArrowDown,
-  Setting,
-  User,
+
   Expand,
   Fold,
 } from '@element-plus/icons-vue'
@@ -92,11 +90,8 @@ const toggleSidebar = () => {
   isSidebarCollapsed.value = !isSidebarCollapsed.value
 }
 
-const goToProfile = () => {
-  router.push('/profile')
-}
-
-const showSettings = ref(false)
+const showProfileSettings = ref(false)
+const activeTab = ref('profile') // 'profile' or 'settings'
 const theme = ref('light') // 'light' or 'dark'
 const language = ref('zh-CN') // 'zh-CN' or 'en-US'
 
@@ -108,8 +103,11 @@ onMounted(() => {
   toggleTheme() // 应用初始主题
 })
 
-const goToSettings = () => {
-  showSettings.value = true
+const saveSettings = () => {
+  // 保存设置到本地存储
+  localStorage.setItem('app-theme', theme.value)
+  localStorage.setItem('app-language', language.value)
+  showProfileSettings.value = false
 }
 
 const toggleTheme = () => {
@@ -161,33 +159,11 @@ const changeLanguage = (lang: string) => {
       </el-menu>
       <footer class="sidebar-footer" v-if="currentUser">
         <div class="user-section" v-show="!isSidebarCollapsed">
-          <el-dropdown 
-            class="user-dropdown" 
-            :hide-on-click="true"
-            trigger="click"
-          >
-            <div class="user-trigger">
-              <div class="user-details">
-                <div class="user-name-role">{{ displayName }} ({{ roleDisplay }})</div>
-              </div>
-              <el-icon class="arrow-icon">
-                <ArrowDown />
-              </el-icon>
+          <div class="user-trigger" @click="showProfileSettings = true">
+            <div class="user-details">
+              <div class="user-name-role">{{ displayName }} ({{ roleDisplay }})</div>
             </div>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item :icon="User" @click="goToProfile">
-                  个人资料
-                </el-dropdown-item>
-                <el-dropdown-item :icon="Setting" @click="goToSettings">
-                  设置
-                </el-dropdown-item>
-                <el-dropdown-item divided @click="handleLogout" :icon="UserFilled">
-                  退出登录
-                </el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
+          </div>
         </div>
         
         <el-button 
@@ -205,42 +181,103 @@ const changeLanguage = (lang: string) => {
       </div>
     </el-main>
     
-    <!-- 设置弹窗 -->
+    <!-- 个人资料和设置弹窗 -->
     <el-dialog
-      v-model="showSettings"
-      title="系统设置"
-      width="400px"
+      v-model="showProfileSettings"
+      width="500px"
       :modal="true"
       :show-close="true"
-      class="settings-dialog"
+      class="profile-settings-dialog"
     >
-      <div class="settings-options">
-        <div class="setting-item">
-          <span class="setting-label">主题模式</span>
-          <el-switch
-            v-model="theme"
-            active-value="dark"
-            inactive-value="light"
-            @change="toggleTheme"
-            inline-prompt
-            :active-text="theme === 'dark' ? '黑夜' : '白天'"
-            :inactive-text="theme === 'dark' ? '黑夜' : '白天'"
-          />
+      <template #header>
+        <div class="dialog-header">
+          <el-tabs v-model="activeTab" class="profile-settings-tabs">
+            <el-tab-pane label="个人资料" name="profile"></el-tab-pane>
+            <el-tab-pane label="系统设置" name="settings"></el-tab-pane>
+          </el-tabs>
+        </div>
+      </template>
+      
+      <div class="dialog-content">
+        <!-- 个人资料标签页 -->
+        <div v-if="activeTab === 'profile'" class="profile-content">
+          <div class="profile-header">
+            <el-avatar :size="80" :style="{ backgroundColor: '#409EFF' }">
+              {{ userInitials }}
+            </el-avatar>
+            <div class="profile-basic-info">
+              <h3>{{ displayName }}</h3>
+              <p>{{ roleDisplay }}</p>
+            </div>
+          </div>
+          
+          <div class="profile-details">
+            <div class="detail-item">
+              <span class="label">账号</span>
+              <span class="value">{{ currentUser?.Account || 'N/A' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">手机号</span>
+              <span class="value">{{ currentUser?.Phone || 'N/A' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">创建时间</span>
+              <span class="value">{{ currentUser?.CreatedAt || 'N/A' }}</span>
+            </div>
+          </div>
         </div>
         
-        <div class="setting-item">
-          <span class="setting-label">语言</span>
-          <el-select 
-            v-model="language" 
-            placeholder="选择语言"
-            @change="changeLanguage"
-            style="width: 100%;"
-          >
-            <el-option label="简体中文" value="zh-CN" />
-            <el-option label="English" value="en-US" />
-          </el-select>
+        <!-- 系统设置标签页 -->
+        <div v-if="activeTab === 'settings'" class="settings-content">
+          <div class="settings-options">
+            <div class="setting-item">
+              <span class="setting-label">主题模式</span>
+              <el-switch
+                v-model="theme"
+                active-value="dark"
+                inactive-value="light"
+                @change="toggleTheme"
+                inline-prompt
+                :active-text="theme === 'dark' ? '黑夜' : '白天'"
+                :inactive-text="theme === 'dark' ? '黑夜' : '白天'"
+              />
+            </div>
+            
+            <div class="setting-item">
+              <span class="setting-label">语言</span>
+              <el-select 
+                v-model="language" 
+                placeholder="选择语言"
+                @change="changeLanguage"
+                style="width: 100%;"
+              >
+                <el-option label="简体中文" value="zh-CN" />
+                <el-option label="English" value="en-US" />
+              </el-select>
+            </div>
+          </div>
         </div>
       </div>
+      
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="showProfileSettings = false">取消</el-button>
+          <el-button 
+            v-if="activeTab === 'profile'"
+            type="danger" 
+            @click="handleLogout"
+          >
+            退出登录
+          </el-button>
+          <el-button 
+            v-else
+            type="primary" 
+            @click="saveSettings"
+          >
+            保存
+          </el-button>
+        </div>
+      </template>
     </el-dialog>
   </el-container>
 </template>
@@ -451,8 +488,80 @@ const changeLanguage = (lang: string) => {
   color: #606266;
 }
 
-.settings-dialog :deep(.el-dialog__body) {
+.profile-settings-dialog :deep(.el-dialog__body) {
+  padding: 0;
+}
+
+.profile-settings-tabs :deep(.el-tabs__header) {
+  margin: 0;
+}
+
+.profile-settings-tabs :deep(.el-tabs__nav-wrap)::after {
+  height: 1px;
+}
+
+.dialog-content {
   padding: 20px;
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 20px;
+}
+
+.profile-basic-info h3 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.profile-basic-info p {
+  margin: 0;
+  color: #909399;
+  font-size: 14px;
+}
+
+.profile-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px dashed #eee;
+}
+
+.detail-item:last-child {
+  border-bottom: none;
+}
+
+.detail-item .label {
+  color: #909399;
+  font-size: 14px;
+}
+
+.detail-item .value {
+  color: #303133;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 20px;
+  border-top: 1px solid #eee;
+}
+
+.dialog-header {
+  border-bottom: 1px solid #eee;
 }
 </style>
 .user-avatar :deep(.el-avatar__inner) {
