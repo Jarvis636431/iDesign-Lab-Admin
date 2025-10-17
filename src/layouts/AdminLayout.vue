@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue'
-import { RouterView, useRoute, useRouter } from 'vue-router'
+import { computed, ref, onMounted } from 'vue';
+import { RouterView, useRoute, useRouter } from 'vue-router';
 import {
   Odometer,
   UserFilled,
@@ -8,23 +8,22 @@ import {
   Collection,
   Timer,
   OfficeBuilding,
-
   Expand,
   Fold,
-} from '@element-plus/icons-vue'
-import { ElMessageBox, ElDropdown } from 'element-plus'
-import { useAuthStore } from '../stores/auth'
-import { storeToRefs } from 'pinia'
+} from '@element-plus/icons-vue';
+import { ElMessageBox} from 'element-plus';
+import { useAuthStore } from '../stores/auth';
+import { storeToRefs } from 'pinia';
 
-const route = useRoute()
-const router = useRouter()
-const authStore = useAuthStore()
-const { user: currentUser, isAuthenticated } = storeToRefs(authStore)
-const brandLogo = new URL('../assets/logo.png', import.meta.url).href
-const isSidebarCollapsed = ref(false)
+const route = useRoute();
+const router = useRouter();
+const authStore = useAuthStore();
+const { user: currentUser, isAuthenticated } = storeToRefs(authStore);
+const brandLogo = new URL('../assets/logo.png', import.meta.url).href;
+const isSidebarCollapsed = ref(false);
 
 const menuItems = computed(() => {
-  if (!isAuthenticated.value) return []
+  if (!isAuthenticated.value) return [];
   return [
     {
       label: '仪表盘',
@@ -56,22 +55,22 @@ const menuItems = computed(() => {
       path: '/rooms',
       icon: OfficeBuilding,
     },
-  ]
-})
+  ];
+});
 
 const roleDisplay = computed(() => {
-  const role = currentUser.value?.Role
+  const role = currentUser.value?.Role;
   const map: Record<string, string> = {
     admin: '管理员',
     teacher: '教师',
     student: '学生',
     temporary: '临时用户',
-  }
-  if (role && map[role]) return map[role]
-  return '未知角色'
-})
+  };
+  if (role && map[role]) return map[role];
+  return '未知角色';
+});
 
-const displayName = computed(() => currentUser.value?.Name || '访客用户')
+const displayName = computed(() => currentUser.value?.Name || '访客用户');
 
 const handleLogout = () => {
   ElMessageBox.confirm('确认退出当前账号吗？', '退出登录', {
@@ -80,57 +79,69 @@ const handleLogout = () => {
     type: 'warning',
   })
     .then(() => {
-      authStore.logout()
-      router.push({ path: '/login' })
+      authStore.logout();
+      router.push({ path: '/login' });
     })
-    .catch(() => {})
-}
+    .catch(() => {});
+};
 
 const toggleSidebar = () => {
-  isSidebarCollapsed.value = !isSidebarCollapsed.value
-}
+  isSidebarCollapsed.value = !isSidebarCollapsed.value;
+};
 
-const showProfileSettings = ref(false)
-const activeTab = ref('profile') // 'profile' or 'settings'
-const theme = ref('light') // 'light' or 'dark'
-const language = ref('zh-CN') // 'zh-CN' or 'en-US'
+const showProfileSettings = ref(false);
+const activeTab = ref('profile'); // 'profile' or 'settings'
+const theme = ref('light'); // 'light' or 'dark'
+const language = ref('zh-CN'); // 'zh-CN' or 'en-US'
 
 // 初始化主题
 onMounted(() => {
   // 从本地存储或系统偏好设置默认主题
-  const savedTheme = localStorage.getItem('app-theme') || 'light'
-  theme.value = savedTheme
-  toggleTheme() // 应用初始主题
-})
+  const savedTheme = localStorage.getItem('app-theme') || 'light';
+  theme.value = savedTheme;
+  toggleTheme(); // 应用初始主题
+});
 
 const saveSettings = () => {
   // 保存设置到本地存储
-  localStorage.setItem('app-theme', theme.value)
-  localStorage.setItem('app-language', language.value)
-  showProfileSettings.value = false
-}
+  localStorage.setItem('app-theme', theme.value);
+  localStorage.setItem('app-language', language.value);
+  showProfileSettings.value = false;
+};
+
+const getRoleTagType = computed(() => {
+  const role = currentUser.value?.Role;
+  if (role === 'admin') return 'danger';
+  if (role === 'teacher') return 'warning';
+  if (role === 'student') return 'success';
+  if (role === 'temporary') return 'info';
+  return 'info';
+});
 
 const toggleTheme = () => {
-  theme.value = theme.value === 'light' ? 'dark' : 'light'
+  theme.value = theme.value === 'light' ? 'dark' : 'light';
   // 可以在这里添加主题切换逻辑到整个应用
   if (theme.value === 'dark') {
-    document.body.classList.remove('light-theme')
-    document.body.classList.add('dark-theme')
+    document.body.classList.remove('light-theme');
+    document.body.classList.add('dark-theme');
   } else {
-    document.body.classList.remove('dark-theme')
-    document.body.classList.add('light-theme')
+    document.body.classList.remove('dark-theme');
+    document.body.classList.add('light-theme');
   }
-}
+};
 
 const changeLanguage = (lang: string) => {
-  language.value = lang
+  language.value = lang;
   // 可以在这里添加国际化切换逻辑
-}
+};
 </script>
 
 <template>
   <el-container class="admin-layout">
-    <el-aside :width="isSidebarCollapsed ? '64px' : '220px'" class="admin-sidebar">
+    <el-aside
+      :width="isSidebarCollapsed ? '64px' : '220px'"
+      class="admin-sidebar"
+    >
       <div class="sidebar-brand">
         <div class="brand-info">
           <img :src="brandLogo" alt="iDesign Lab" class="brand-logo" />
@@ -140,11 +151,7 @@ const changeLanguage = (lang: string) => {
           </div>
         </div>
       </div>
-      <el-menu
-        :default-active="route.path"
-        class="sidebar-menu"
-        router
-      >
+      <el-menu :default-active="route.path" class="sidebar-menu" router>
         <el-menu-item
           v-for="item in menuItems"
           :key="item.path"
@@ -161,12 +168,14 @@ const changeLanguage = (lang: string) => {
         <div class="user-section" v-show="!isSidebarCollapsed">
           <div class="user-trigger" @click="showProfileSettings = true">
             <div class="user-details">
-              <div class="user-name-role">{{ displayName }} ({{ roleDisplay }})</div>
+              <div class="user-name-role">
+                {{ displayName }} ({{ roleDisplay }})
+              </div>
             </div>
           </div>
         </div>
-        
-        <el-button 
+
+        <el-button
           class="collapse-btn"
           :icon="isSidebarCollapsed ? Expand : Fold"
           @click="toggleSidebar"
@@ -180,7 +189,7 @@ const changeLanguage = (lang: string) => {
         <RouterView />
       </div>
     </el-main>
-    
+
     <!-- 个人资料和设置弹窗 -->
     <el-dialog
       v-model="showProfileSettings"
@@ -197,20 +206,21 @@ const changeLanguage = (lang: string) => {
           </el-tabs>
         </div>
       </template>
-      
+
       <div class="dialog-content">
         <!-- 个人资料标签页 -->
         <div v-if="activeTab === 'profile'" class="profile-content">
           <div class="profile-header">
-            <el-avatar :size="80" :style="{ backgroundColor: '#409EFF' }">
-              {{ userInitials }}
-            </el-avatar>
             <div class="profile-basic-info">
-              <h3>{{ displayName }}</h3>
-              <p>{{ roleDisplay }}</p>
+              <div class="name-role-container">
+                <h3 class="user-name">{{ displayName }}</h3>
+                <el-tag size="small" :type="getRoleTagType" class="role-tag">{{
+                  roleDisplay
+                }}</el-tag>
+              </div>
             </div>
           </div>
-          
+
           <div class="profile-details">
             <div class="detail-item">
               <span class="label">账号</span>
@@ -220,13 +230,9 @@ const changeLanguage = (lang: string) => {
               <span class="label">手机号</span>
               <span class="value">{{ currentUser?.Phone || 'N/A' }}</span>
             </div>
-            <div class="detail-item">
-              <span class="label">创建时间</span>
-              <span class="value">{{ currentUser?.CreatedAt || 'N/A' }}</span>
-            </div>
           </div>
         </div>
-        
+
         <!-- 系统设置标签页 -->
         <div v-if="activeTab === 'settings'" class="settings-content">
           <div class="settings-options">
@@ -242,14 +248,14 @@ const changeLanguage = (lang: string) => {
                 :inactive-text="theme === 'dark' ? '黑夜' : '白天'"
               />
             </div>
-            
+
             <div class="setting-item">
               <span class="setting-label">语言</span>
-              <el-select 
-                v-model="language" 
+              <el-select
+                v-model="language"
                 placeholder="选择语言"
                 @change="changeLanguage"
-                style="width: 100%;"
+                style="width: 100%"
               >
                 <el-option label="简体中文" value="zh-CN" />
                 <el-option label="English" value="en-US" />
@@ -258,22 +264,18 @@ const changeLanguage = (lang: string) => {
           </div>
         </div>
       </div>
-      
+
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="showProfileSettings = false">取消</el-button>
-          <el-button 
+          <el-button
             v-if="activeTab === 'profile'"
-            type="danger" 
+            type="danger"
             @click="handleLogout"
           >
             退出登录
           </el-button>
-          <el-button 
-            v-else
-            type="primary" 
-            @click="saveSettings"
-          >
+          <el-button v-else type="primary" @click="saveSettings">
             保存
           </el-button>
         </div>
@@ -493,6 +495,7 @@ const changeLanguage = (lang: string) => {
 }
 
 .profile-settings-tabs :deep(.el-tabs__header) {
+  padding: 0 20px;
   margin: 0;
 }
 
@@ -514,15 +517,24 @@ const changeLanguage = (lang: string) => {
 }
 
 .profile-basic-info h3 {
-  margin: 0 0 8px 0;
+  margin: 0;
   font-size: 18px;
   font-weight: 600;
 }
 
-.profile-basic-info p {
+.name-role-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-name {
   margin: 0;
-  color: #909399;
-  font-size: 14px;
+}
+
+.role-tag {
+  height: 24px;
+  line-height: 22px;
 }
 
 .profile-details {
@@ -564,6 +576,4 @@ const changeLanguage = (lang: string) => {
   border-bottom: 1px solid #eee;
 }
 </style>
-.user-avatar :deep(.el-avatar__inner) {
-  font-weight: 600;
-}
+.user-avatar :deep(.el-avatar__inner) { font-weight: 600; }
