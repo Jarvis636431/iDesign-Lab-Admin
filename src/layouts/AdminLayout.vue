@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { RouterView, useRoute, useRouter } from 'vue-router'
 import {
   Odometer,
@@ -96,8 +96,37 @@ const goToProfile = () => {
   router.push('/profile')
 }
 
+const showSettings = ref(false)
+const theme = ref('light') // 'light' or 'dark'
+const language = ref('zh-CN') // 'zh-CN' or 'en-US'
+
+// 初始化主题
+onMounted(() => {
+  // 从本地存储或系统偏好设置默认主题
+  const savedTheme = localStorage.getItem('app-theme') || 'light'
+  theme.value = savedTheme
+  toggleTheme() // 应用初始主题
+})
+
 const goToSettings = () => {
-  router.push('/settings')
+  showSettings.value = true
+}
+
+const toggleTheme = () => {
+  theme.value = theme.value === 'light' ? 'dark' : 'light'
+  // 可以在这里添加主题切换逻辑到整个应用
+  if (theme.value === 'dark') {
+    document.body.classList.remove('light-theme')
+    document.body.classList.add('dark-theme')
+  } else {
+    document.body.classList.remove('dark-theme')
+    document.body.classList.add('light-theme')
+  }
+}
+
+const changeLanguage = (lang: string) => {
+  language.value = lang
+  // 可以在这里添加国际化切换逻辑
 }
 </script>
 
@@ -175,6 +204,44 @@ const goToSettings = () => {
         <RouterView />
       </div>
     </el-main>
+    
+    <!-- 设置弹窗 -->
+    <el-dialog
+      v-model="showSettings"
+      title="系统设置"
+      width="400px"
+      :modal="true"
+      :show-close="true"
+      class="settings-dialog"
+    >
+      <div class="settings-options">
+        <div class="setting-item">
+          <span class="setting-label">主题模式</span>
+          <el-switch
+            v-model="theme"
+            active-value="dark"
+            inactive-value="light"
+            @change="toggleTheme"
+            inline-prompt
+            :active-text="theme === 'dark' ? '黑夜' : '白天'"
+            :inactive-text="theme === 'dark' ? '黑夜' : '白天'"
+          />
+        </div>
+        
+        <div class="setting-item">
+          <span class="setting-label">语言</span>
+          <el-select 
+            v-model="language" 
+            placeholder="选择语言"
+            @change="changeLanguage"
+            style="width: 100%;"
+          >
+            <el-option label="简体中文" value="zh-CN" />
+            <el-option label="English" value="en-US" />
+          </el-select>
+        </div>
+      </div>
+    </el-dialog>
   </el-container>
 </template>
 
@@ -365,6 +432,27 @@ const goToSettings = () => {
   height: 100%;
   padding: 1.5rem 2rem;
   overflow: auto;
+}
+
+.settings-options {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.setting-label {
+  font-size: 14px;
+  color: #606266;
+}
+
+.settings-dialog :deep(.el-dialog__body) {
+  padding: 20px;
 }
 </style>
 .user-avatar :deep(.el-avatar__inner) {

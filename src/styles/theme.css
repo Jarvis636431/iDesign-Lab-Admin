@@ -1,0 +1,25 @@
+/* 主题样式 */
+.light-theme {
+  --bg-color: #f5f7fa;
+  --sidebar-bg: #1f2d3d;
+  --text-color: #303133;
+  --border-color: #dcdfe6;
+}
+
+.dark-theme {
+  --bg-color: #1a1a1a;
+  --sidebar-bg: #141414;
+  --text-color: #e4e7ed;
+  --border-color: #4c4d4f;
+}
+
+/* 全局应用主题变量 */
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.admin-sidebar {
+  background-color: var(--sidebar-bg) !important;
+}
