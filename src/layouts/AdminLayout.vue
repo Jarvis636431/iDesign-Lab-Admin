@@ -286,8 +286,9 @@ const changeLanguage = (lang: string) => {
 
 <style scoped>
 .admin-layout {
-  min-height: 100vh;
+  height: 100vh;
   background: #f5f7fa;
+  overflow: hidden;
 }
 
 .admin-sidebar {
@@ -297,6 +298,7 @@ const changeLanguage = (lang: string) => {
   color: #fff;
   padding: 1rem 0;
   box-shadow: 2px 0 12px rgba(15, 23, 42, 0.2);
+  overflow: hidden;
 }
 
 .sidebar-brand {
