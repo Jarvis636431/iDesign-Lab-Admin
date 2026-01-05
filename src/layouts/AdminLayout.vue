@@ -52,7 +52,7 @@ const menuItems = computed(() => {
     },
     {
       label: '教室管理',
-      path: '/rooms',
+      path: '/labs',
       icon: OfficeBuilding,
     },
   ];

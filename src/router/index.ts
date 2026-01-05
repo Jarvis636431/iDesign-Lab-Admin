@@ -38,9 +38,9 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '学期管理' },
       },
       {
-        path: 'rooms',
-        name: 'Rooms',
-        component: () => import('../views/Rooms.vue'),
+        path: 'labs',
+        name: 'Labs',
+        component: () => import('../views/Labs.vue'),
         meta: { title: '教室管理' },
       },
     ],
