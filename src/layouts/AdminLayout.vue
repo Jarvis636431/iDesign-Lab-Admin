@@ -97,6 +97,7 @@ const language = ref('zh-CN'); // 'zh-CN' or 'en-US'
 // 初始化主题
 const applyTheme = (value: 'light' | 'dark') => {
   theme.value = value;
+  localStorage.setItem('app-theme', value);
   if (value === 'dark') {
     document.body.classList.remove('light-theme');
     document.body.classList.add('dark-theme');
@@ -116,9 +117,6 @@ onMounted(() => {
 });
 
 const saveSettings = () => {
-  // 保存设置到本地存储
-  localStorage.setItem('app-theme', theme.value);
-  localStorage.setItem('app-language', language.value);
   showProfileSettings.value = false;
 };
 
@@ -131,12 +129,10 @@ const getRoleTagType = computed(() => {
   return 'info';
 });
 
-const toggleTheme = () => {
-  applyTheme(theme.value);
-};
 
 const changeLanguage = (lang: string) => {
   language.value = lang;
+  localStorage.setItem('app-language', lang);
   // 可以在这里添加国际化切换逻辑
 };
 </script>
@@ -243,11 +239,11 @@ const changeLanguage = (lang: string) => {
           <div class="settings-options">
             <div class="setting-item">
               <span class="setting-label">主题模式</span>
-<el-switch
+              <el-switch
                 v-model="theme"
                 active-value="dark"
                 inactive-value="light"
-                @change="toggleTheme"
+                @change="applyTheme"
                 inline-prompt
                 :active-text="theme === 'dark' ? '黑夜' : '白天'"
                 :inactive-text="theme === 'dark' ? '黑夜' : '白天'"
