@@ -91,15 +91,28 @@ const toggleSidebar = () => {
 
 const showProfileSettings = ref(false);
 const activeTab = ref('profile'); // 'profile' or 'settings'
-const theme = ref('light'); // 'light' or 'dark'
+const theme = ref<'light' | 'dark'>('light');
 const language = ref('zh-CN'); // 'zh-CN' or 'en-US'
 
 // 初始化主题
+const applyTheme = (value: 'light' | 'dark') => {
+  theme.value = value;
+  if (value === 'dark') {
+    document.body.classList.remove('light-theme');
+    document.body.classList.add('dark-theme');
+  } else {
+    document.body.classList.remove('dark-theme');
+    document.body.classList.add('light-theme');
+  }
+};
+
 onMounted(() => {
-  // 从本地存储或系统偏好设置默认主题
-  const savedTheme = localStorage.getItem('app-theme') || 'light';
-  theme.value = savedTheme;
-  toggleTheme(); // 应用初始主题
+  const savedTheme = (localStorage.getItem('app-theme') as 'light' | 'dark') || 'light';
+  const savedLanguage = localStorage.getItem('app-language');
+  applyTheme(savedTheme);
+  if (savedLanguage) {
+    language.value = savedLanguage;
+  }
 });
 
 const saveSettings = () => {
@@ -119,15 +132,7 @@ const getRoleTagType = computed(() => {
 });
 
 const toggleTheme = () => {
-  theme.value = theme.value === 'light' ? 'dark' : 'light';
-  // 可以在这里添加主题切换逻辑到整个应用
-  if (theme.value === 'dark') {
-    document.body.classList.remove('light-theme');
-    document.body.classList.add('dark-theme');
-  } else {
-    document.body.classList.remove('dark-theme');
-    document.body.classList.add('light-theme');
-  }
+  applyTheme(theme.value);
 };
 
 const changeLanguage = (lang: string) => {
@@ -238,7 +243,7 @@ const changeLanguage = (lang: string) => {
           <div class="settings-options">
             <div class="setting-item">
               <span class="setting-label">主题模式</span>
-              <el-switch
+<el-switch
                 v-model="theme"
                 active-value="dark"
                 inactive-value="light"
@@ -577,5 +582,8 @@ const changeLanguage = (lang: string) => {
 .dialog-header {
   border-bottom: 1px solid #eee;
 }
+
+.user-avatar :deep(.el-avatar__inner) {
+  font-weight: 600;
+}
 </style>
-.user-avatar :deep(.el-avatar__inner) { font-weight: 600; }
