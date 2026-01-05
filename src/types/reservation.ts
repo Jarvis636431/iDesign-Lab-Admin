@@ -1,4 +1,4 @@
-import type { ApiResponse } from './common'
+import type { ApiResponse, PaginationMeta } from './common'
 
 export type TimeSlot = 'morning' | 'noon' | 'afternoon' | 'evening'
 export type ReservationStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled' | 'violated'
@@ -48,7 +48,9 @@ export interface CreateReservationPayload {
   participant_accounts: string[]
 }
 
-export type ReservationListResponse = ApiResponse<Reservation[]>
+export type ReservationListResponse = ApiResponse<Reservation[]> & {
+  pagination?: PaginationMeta
+}
 export type ReservationDetailResponse = ApiResponse<Reservation>
 
 export interface CreateReservationResponse extends ApiResponse<Reservation> {

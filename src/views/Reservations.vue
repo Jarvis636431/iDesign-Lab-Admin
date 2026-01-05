@@ -23,6 +23,12 @@ const reservations = ref<Reservation[]>([]);
 const detailVisible = ref(false);
 const currentReservation = ref<Reservation | null>(null);
 
+const pagination = reactive({
+  page: 1,
+  size: 10,
+  total: 0,
+});
+
 const filters = reactive({
   dateRange: [] as DateRange | [],
   time_slot: "" as TimeSlot | "",
@@ -42,7 +48,10 @@ const canCancel = (reservation: Reservation) =>
   reservation.status === "pending";
 
 const buildQuery = (): ReservationQuery => {
-  const query: ReservationQuery = {};
+  const query: ReservationQuery = {
+    page: pagination.page,
+    size: pagination.size,
+  };
   if (filters.dateRange.length === 2) {
     const [start, end] = filters.dateRange;
     query.start_date = dayjs(start).format("YYYY-MM-DD");
@@ -71,6 +80,13 @@ const fetchReservations = async () => {
   try {
     const response = await getReservations(buildQuery());
     reservations.value = response.data;
+    if (response.pagination) {
+      pagination.total = response.pagination.total;
+      pagination.page = response.pagination.page;
+      pagination.size = response.pagination.size;
+    } else {
+      pagination.total = response.data?.length ?? 0;
+    }
   } catch (error) {
     ElMessage.error("获取预约列表失败，请稍后重试");
   } finally {
@@ -79,6 +95,7 @@ const fetchReservations = async () => {
 };
 
 const handleSearch = () => {
+  pagination.page = 1;
   fetchReservations();
 };
 
@@ -89,12 +106,24 @@ const handleReset = () => {
   filters.room_id = "";
   filters.creator_account = "";
   filters.participant_account = "";
+  pagination.page = 1;
   fetchReservations();
 };
 
 const handleViewDetail = (row: Reservation) => {
   currentReservation.value = row;
   detailVisible.value = true;
+};
+
+const handlePageChange = (page: number) => {
+  pagination.page = page;
+  fetchReservations();
+};
+
+const handlePageSizeChange = (size: number) => {
+  pagination.size = size;
+  pagination.page = 1;
+  fetchReservations();
 };
 
 const handleCancelReservation = (row: Reservation) => {
@@ -330,6 +359,18 @@ onMounted(() => {
           </template>
         </el-table-column>
       </el-table>
+
+      <div class="table-footer">
+        <el-pagination
+          :current-page="pagination.page"
+          :page-size="pagination.size"
+          :page-sizes="[10, 20, 50]"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="pagination.total"
+          @size-change="handlePageSizeChange"
+          @current-change="handlePageChange"
+        />
+      </div>
     </el-card>
 
     <el-drawer
@@ -515,6 +556,12 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+}
+
+.table-footer {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .detail-content section h3 {
