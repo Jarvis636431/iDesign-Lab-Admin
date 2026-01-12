@@ -24,6 +24,8 @@ const filters = reactive({
 
 const dialogVisible = ref(false);
 const editingLab = ref<Lab | null>(null);
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? '/api/v1';
+const apiOrigin = apiBaseUrl.replace(/\/api\/v1\/?$/, '');
 
 const form = reactive({
   lab_name: '',
@@ -141,6 +143,13 @@ const handleImageChange = (file: UploadFile) => {
   if (!file.raw) return;
   form.imageFile = file.raw;
   form.imagePreview = URL.createObjectURL(file.raw);
+};
+
+const resolveImageUrl = (value?: string) => {
+  if (!value) return '';
+  if (/^https?:\/\//i.test(value)) return value;
+  if (!apiOrigin) return value;
+  return `${apiOrigin}${value.startsWith('/') ? '' : '/'}${value}`;
 };
 
 const handleSubmit = async () => {
@@ -305,8 +314,8 @@ onMounted(() => {
           <template #default="{ row }">
             <el-image
               v-if="row.image"
-              :src="row.image"
-              :preview-src-list="[row.image]"
+              :src="resolveImageUrl(row.image)"
+              :preview-src-list="[resolveImageUrl(row.image)]"
               fit="cover"
               class="lab-image"
             />
@@ -401,7 +410,11 @@ onMounted(() => {
           </el-upload>
           <div v-if="form.imagePreview" class="image-preview">
             <span>当前图片：</span>
-            <a :href="form.imagePreview" target="_blank" rel="noreferrer">
+            <a
+              :href="resolveImageUrl(form.imagePreview)"
+              target="_blank"
+              rel="noreferrer"
+            >
               查看
             </a>
           </div>
