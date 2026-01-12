@@ -5,10 +5,7 @@ import dayjs from 'dayjs';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { useAuthStore } from '../stores/auth';
 import { getUsers, updateUserStatus } from '../services/user';
-import type {
-  User,
-  UserStatus,
-} from '../types/user';
+import type { User, UserStatus } from '../types/user';
 
 type RoleTab = 'student' | 'temporary';
 type StatusFilter = UserStatus | 'all';
@@ -90,7 +87,7 @@ const tableData = computed<User[]>(() => {
 
 const selectedIds = computed(() => selectedRows.value.map((row) => row.id));
 
-const handleSelectionChange = (rows: DisplayUser[]) => {
+const handleSelectionChange = (rows: User[]) => {
   selectedRows.value = rows;
 };
 
