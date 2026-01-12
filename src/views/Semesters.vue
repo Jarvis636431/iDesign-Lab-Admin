@@ -61,11 +61,13 @@ const fetchSemesters = async () => {
   loading.value = true;
   try {
     const response = await getSemesters(buildQuery());
-    semesters.value = response.data;
-    if (response.pagination) {
-      pagination.total = response.pagination.total;
-      pagination.page = response.pagination.page;
-      pagination.size = response.pagination.size;
+    semesters.value = response.data.items ?? [];
+    if (response.data.pagination) {
+      pagination.total = response.data.pagination.total;
+      pagination.page = response.data.pagination.page;
+      pagination.size = response.data.pagination.size;
+    } else {
+      pagination.total = response.data.total ?? response.data.items.length ?? 0;
     }
   } catch {
     ElMessage.error('获取学期列表失败，请稍后重试');
@@ -154,7 +156,7 @@ const handleSubmit = async () => {
   };
   try {
     if (editingSemester.value) {
-      await updateSemester(editingSemester.value.ID, payload);
+      await updateSemester(editingSemester.value.id, payload);
       ElMessage.success('学期更新成功');
     } else {
       await createSemester(payload);
@@ -187,7 +189,7 @@ const handleSetActive = async (semester: Semester) => {
 
   submitting.value = true;
   try {
-    await updateSemester(semester.ID, { is_active: true });
+    await updateSemester(semester.id, { is_active: true });
     ElMessage.success('当前学期已更新');
     fetchSemesters();
     fetchCurrentSemester();
@@ -287,7 +289,7 @@ onMounted(() => {
         v-loading="loading"
         empty-text="暂无学期数据"
       >
-        <el-table-column prop="ID" label="ID" width="80" />
+        <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="name" label="名称" min-width="180" />
         <el-table-column label="时间范围" min-width="220">
           <template #default="{ row }">

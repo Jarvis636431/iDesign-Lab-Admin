@@ -1,13 +1,11 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import dayjs from 'dayjs';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { useAuthStore } from '../stores/auth';
-import { getManagedUsers, updateManagedUserStatus } from '../services/user';
+import { getUsers, updateUserStatus } from '../services/user';
 import type {
-  ManagedUsersResponse,
-  ManagementScope,
   User,
   UserStatus,
 } from '../types/user';
@@ -15,25 +13,21 @@ import type {
 type RoleTab = 'student' | 'temporary';
 type StatusFilter = UserStatus | 'all';
 
-interface DisplayUser extends User {
-  __status: UserStatus;
-}
-
 const authStore = useAuthStore();
 const { user: currentUser } = storeToRefs(authStore);
 
-const scope = computed<ManagementScope | null>(() => {
-  if (currentUser.value?.Role === 'admin') return 'admin';
-  if (currentUser.value?.Role === 'teacher') return 'teacher';
+const scope = computed<'admin' | 'teacher' | null>(() => {
+  if (currentUser.value?.role === 'admin') return 'admin';
+  if (currentUser.value?.role === 'teacher') return 'teacher';
   return null;
 });
 
 const loading = ref(false);
 const actionLoading = ref(false);
-const managed = ref<ManagedUsersResponse | null>(null);
+const users = ref<User[]>([]);
 const activeRole = ref<RoleTab>('student');
 const activeStatus = ref<StatusFilter>('pending');
-const selectedRows = ref<DisplayUser[]>([]);
+const selectedRows = ref<User[]>([]);
 
 const statusOptions: Array<{ value: UserStatus; label: string; type: string }> =
   [
@@ -43,15 +37,15 @@ const statusOptions: Array<{ value: UserStatus; label: string; type: string }> =
     { value: 'banned', label: '已封禁', type: 'danger' },
   ];
 
-const fetchManaged = async () => {
+const fetchUsers = async () => {
   if (!scope.value) return;
   loading.value = true;
   try {
-    const data = await getManagedUsers(scope.value);
-    managed.value = data;
+    const data = await getUsers({ role: activeRole.value, size: 100 });
+    users.value = data.data.items ?? [];
   } catch {
     ElMessage.error('获取用户列表失败，请稍后重试');
-    managed.value = null;
+    users.value = [];
   } finally {
     loading.value = false;
   }
@@ -61,65 +55,40 @@ watch(
   scope,
   (value) => {
     if (value) {
-      fetchManaged();
+      fetchUsers();
     }
   },
   { immediate: true }
 );
 
-onMounted(() => {
-  if (scope.value) fetchManaged();
-});
-
 watch(activeRole, () => {
   activeStatus.value = 'pending';
   resetSelection();
+  fetchUsers();
 });
 
-watch(managed, () => {
+watch(users, () => {
   resetSelection();
 });
 
-const currentBuckets = computed(() => {
-  if (!managed.value) return null;
-  return managed.value[activeRole.value];
-});
-
 const statusCounts = computed<Record<UserStatus, number>>(() => {
-  const buckets = currentBuckets.value;
-  if (!buckets) {
-    return {
-      pending: 0,
-      approved: 0,
-      rejected: 0,
-      banned: 0,
-    };
+  if (!users.value.length) {
+    return { pending: 0, approved: 0, rejected: 0, banned: 0 };
   }
   return {
-    pending: buckets.pending.length,
-    approved: buckets.approved.length,
-    rejected: buckets.rejected.length,
-    banned: buckets.banned.length,
+    pending: users.value.filter((item) => item.status === 'pending').length,
+    approved: users.value.filter((item) => item.status === 'approved').length,
+    rejected: users.value.filter((item) => item.status === 'rejected').length,
+    banned: users.value.filter((item) => item.status === 'banned').length,
   };
 });
 
-const tableData = computed<DisplayUser[]>(() => {
-  const buckets = currentBuckets.value;
-  if (!buckets) return [];
-  const statuses: UserStatus[] =
-    activeStatus.value === 'all'
-      ? ['pending', 'approved', 'rejected', 'banned']
-      : [activeStatus.value as UserStatus];
-
-  return statuses.flatMap((status) =>
-    (buckets[status] ?? []).map((user) => ({
-      ...user,
-      __status: status,
-    }))
-  );
+const tableData = computed<User[]>(() => {
+  if (activeStatus.value === 'all') return users.value;
+  return users.value.filter((item) => item.status === activeStatus.value);
 });
 
-const selectedIds = computed(() => selectedRows.value.map((row) => row.ID));
+const selectedIds = computed(() => selectedRows.value.map((row) => row.id));
 
 const handleSelectionChange = (rows: DisplayUser[]) => {
   selectedRows.value = rows;
@@ -172,14 +141,14 @@ const confirmAndUpdateStatus = async (
 
   actionLoading.value = true;
   try {
-    await updateManagedUserStatus(scope.value, {
+    await updateUserStatus({
       user_ids: ids,
       status,
       reason,
     });
     ElMessage.success('用户状态更新成功');
     resetSelection();
-    fetchManaged();
+    fetchUsers();
   } catch {
     ElMessage.error('用户状态更新失败，请稍后重试');
   } finally {
@@ -187,9 +156,9 @@ const confirmAndUpdateStatus = async (
   }
 };
 
-const handleRowAction = (row: DisplayUser, status: UserStatus) => {
+const handleRowAction = (row: User, status: UserStatus) => {
   const requireReason = status === 'rejected' || status === 'banned';
-  confirmAndUpdateStatus([row.ID], status, { requireReason });
+  confirmAndUpdateStatus([row.id], status, { requireReason });
 };
 
 const handleBatchAction = (status: UserStatus, message?: string) => {
@@ -305,14 +274,14 @@ const noPermission = computed(() => !scope.value);
           @selection-change="handleSelectionChange"
         >
           <el-table-column type="selection" width="48" />
-          <el-table-column prop="ID" label="ID" width="80" />
+          <el-table-column prop="id" label="ID" width="80" />
           <el-table-column label="用户信息" min-width="220">
             <template #default="{ row }">
               <div class="cell-main">
-                <span class="cell-title">{{ row.Name }}</span>
-                <span class="cell-meta">账号：{{ row.Account }}</span>
-                <span v-if="row.Phone" class="cell-meta"
-                  >手机：{{ row.Phone }}</span
+                <span class="cell-title">{{ row.name }}</span>
+                <span class="cell-meta">账号：{{ row.account }}</span>
+                <span v-if="row.phone" class="cell-meta"
+                  >手机：{{ row.phone }}</span
                 >
               </div>
             </template>
@@ -321,11 +290,11 @@ const noPermission = computed(() => !scope.value);
             <template #default="{ row }">
               <el-tag type="info">
                 {{
-                  row.Role === 'student'
+                  row.role === 'student'
                     ? '学生'
-                    : row.Role === 'teacher'
+                    : row.role === 'teacher'
                       ? '教师'
-                      : row.Role === 'admin'
+                      : row.role === 'admin'
                         ? '管理员'
                         : '临时用户'
                 }}
@@ -336,13 +305,13 @@ const noPermission = computed(() => !scope.value);
             <template #default="{ row }">
               <el-tag
                 :type="
-                  statusOptions.find((item) => item.value === row.__status)
+                  statusOptions.find((item) => item.value === row.status)
                     ?.type ?? 'info'
                 "
               >
                 {{
-                  statusOptions.find((item) => item.value === row.__status)
-                    ?.label ?? row.__status
+                  statusOptions.find((item) => item.value === row.status)
+                    ?.label ?? row.status
                 }}
               </el-tag>
             </template>
@@ -350,8 +319,8 @@ const noPermission = computed(() => !scope.value);
           <el-table-column label="年级/用途" min-width="200">
             <template #default="{ row }">
               <div class="cell-main">
-                <span class="cell-meta">年级：{{ row.Grade ?? '—' }}</span>
-                <span class="cell-meta">用途：{{ row.Purpose ?? '—' }}</span>
+                <span class="cell-meta">年级：{{ row.grade ?? '—' }}</span>
+                <span class="cell-meta">用途：{{ row.purpose ?? '—' }}</span>
               </div>
             </template>
           </el-table-column>
@@ -359,10 +328,10 @@ const noPermission = computed(() => !scope.value);
             <template #default="{ row }">
               <div class="cell-main">
                 <span class="cell-meta"
-                  >创建：{{ formatDate(row.CreatedAt) }}</span
+                  >创建：{{ formatDate(row.created_at) }}</span
                 >
                 <span class="cell-meta"
-                  >更新：{{ formatDate(row.UpdatedAt) }}</span
+                  >更新：{{ formatDate(row.updated_at) }}</span
                 >
               </div>
             </template>
@@ -371,7 +340,7 @@ const noPermission = computed(() => !scope.value);
             <template #default="{ row }">
               <el-space wrap>
                 <el-button
-                  v-if="row.__status !== 'approved'"
+                  v-if="row.status !== 'approved'"
                   type="success"
                   link
                   :loading="actionLoading"
@@ -380,7 +349,7 @@ const noPermission = computed(() => !scope.value);
                   通过
                 </el-button>
                 <el-button
-                  v-if="row.__status !== 'rejected'"
+                  v-if="row.status !== 'rejected'"
                   type="warning"
                   link
                   :loading="actionLoading"
@@ -389,7 +358,7 @@ const noPermission = computed(() => !scope.value);
                   驳回
                 </el-button>
                 <el-button
-                  v-if="row.__status !== 'banned'"
+                  v-if="row.status !== 'banned'"
                   type="danger"
                   link
                   :loading="actionLoading"
@@ -398,7 +367,7 @@ const noPermission = computed(() => !scope.value);
                   封禁
                 </el-button>
                 <el-button
-                  v-if="row.__status === 'banned'"
+                  v-if="row.status === 'banned'"
                   type="primary"
                   link
                   :loading="actionLoading"

@@ -56,7 +56,7 @@ const menuItems = computed(() => {
 });
 
 const roleDisplay = computed(() => {
-  const role = currentUser.value?.Role;
+  const role = currentUser.value?.role;
   const map: Record<string, string> = {
     admin: '管理员',
     teacher: '教师',
@@ -67,7 +67,7 @@ const roleDisplay = computed(() => {
   return '未知角色';
 });
 
-const displayName = computed(() => currentUser.value?.Name || '访客用户');
+const displayName = computed(() => currentUser.value?.name || '访客用户');
 
 const handleLogout = () => {
   ElMessageBox.confirm('确认退出当前账号吗？', '退出登录', {
@@ -115,7 +115,7 @@ const saveSettings = () => {
 };
 
 const getRoleTagType = computed(() => {
-  const role = currentUser.value?.Role;
+  const role = currentUser.value?.role;
   if (role === 'admin') return 'danger';
   if (role === 'teacher') return 'warning';
   if (role === 'student') return 'success';
@@ -180,11 +180,11 @@ const changeLanguage = (lang: string) => {
           <div class="profile-details">
             <div class="detail-item">
               <span class="label">账号</span>
-              <span class="value">{{ currentUser?.Account || 'N/A' }}</span>
+              <span class="value">{{ currentUser?.account || 'N/A' }}</span>
             </div>
             <div class="detail-item">
               <span class="label">手机号</span>
-              <span class="value">{{ currentUser?.Phone || 'N/A' }}</span>
+              <span class="value">{{ currentUser?.phone || 'N/A' }}</span>
             </div>
           </div>
         </div>

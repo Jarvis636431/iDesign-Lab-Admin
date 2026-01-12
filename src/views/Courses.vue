@@ -6,7 +6,6 @@ import {
   getCourses,
   createCourse,
   deleteCourseById,
-  deleteCourseByCriteria,
 } from '../services/courses';
 import { TIME_SLOT_OPTIONS, getTimeSlotLabel } from '../constants/reservations';
 import type { Course, CourseQuery, CreateCoursePayload } from '../types/course';
@@ -24,14 +23,14 @@ const pagination = reactive({
 });
 
 const filters = reactive({
-  room_id: '',
+  lab_id: '',
   time_slot: '' as TimeSlot | '',
   dateRange: [] as DateRange | [],
 });
 
 const createDialogVisible = ref(false);
 const createForm = reactive({
-  room_id: '',
+  lab_id: '',
   date: '',
   time_slot: '' as TimeSlot | '',
   reason: '',
@@ -47,8 +46,8 @@ const buildQuery = (): CourseQuery => {
     size: pagination.size,
   };
 
-  if (filters.room_id) {
-    query.room_id = Number(filters.room_id);
+  if (filters.lab_id) {
+    query.lab_id = Number(filters.lab_id);
   }
 
   if (filters.time_slot) {
@@ -68,11 +67,13 @@ const fetchCourses = async () => {
   loading.value = true;
   try {
     const response = await getCourses(buildQuery());
-    courses.value = response.data;
-    if (response.pagination) {
-      pagination.total = response.pagination.total;
-      pagination.page = response.pagination.page;
-      pagination.size = response.pagination.size;
+    courses.value = response.data.items ?? [];
+    if (response.data.pagination) {
+      pagination.total = response.data.pagination.total;
+      pagination.page = response.data.pagination.page;
+      pagination.size = response.data.pagination.size;
+    } else {
+      pagination.total = response.data.total ?? response.data.items.length ?? 0;
     }
   } catch {
     ElMessage.error('获取课程列表失败，请稍后重试');
@@ -87,7 +88,7 @@ const handleSearch = () => {
 };
 
 const handleReset = () => {
-  filters.room_id = '';
+  filters.lab_id = '';
   filters.time_slot = '';
   filters.dateRange = [];
   pagination.page = 1;
@@ -106,7 +107,7 @@ const handlePageSizeChange = (size: number) => {
 };
 
 const validateCreateForm = () => {
-  if (!createForm.room_id.trim()) {
+  if (!createForm.lab_id.trim()) {
     ElMessage.warning('请填写教室编号');
     return false;
   }
@@ -131,7 +132,7 @@ const handleCreateCourse = async () => {
   submitting.value = true;
   try {
     const payload: CreateCoursePayload = {
-      room_id: Number(createForm.room_id),
+      lab_id: Number(createForm.lab_id),
       date: dayjs(createForm.date).format('YYYY-MM-DD'),
       time_slot: createForm.time_slot as TimeSlot,
       reason: createForm.reason.trim(),
@@ -152,7 +153,7 @@ const handleDeleteCourse = (course: Course) => {
   ElMessageBox.confirm(
     `确认删除 ${course.date.slice(0, 10)} ${timeSlotLabel(
       course.time_slot
-    )} 在教室 ${course.room_id} 的课程吗？`,
+    )} 在教室 ${course.lab_id} 的课程吗？`,
     '删除课程',
     {
       confirmButtonText: '确认删除',
@@ -162,7 +163,7 @@ const handleDeleteCourse = (course: Course) => {
   )
     .then(async () => {
       try {
-        await deleteCourseById(course.ID);
+        await deleteCourseById(course.id);
         ElMessage.success('课程删除成功');
         fetchCourses();
       } catch {
@@ -172,40 +173,8 @@ const handleDeleteCourse = (course: Course) => {
     .catch(() => {});
 };
 
-const handleDeleteByCriteria = () => {
-  ElMessageBox.prompt(
-    '请输入需要删除课程的「教室编号、日期、时间段」（格式：10005,2025-10-20,afternoon）',
-    '按条件删除',
-    {
-      confirmButtonText: '删除',
-      cancelButtonText: '取消',
-      inputPlaceholder: '教室编号,日期,时间段',
-    }
-  )
-    .then(async ({ value }) => {
-      const parts = value.split(',').map((item) => item.trim());
-      if (parts.length !== 3) {
-        ElMessage.warning('输入格式不正确，请重新输入');
-        return;
-      }
-      const [room, date, slot] = parts as [string, string, string];
-      try {
-        await deleteCourseByCriteria({
-          room_id: Number(room),
-          date,
-          time_slot: slot as TimeSlot,
-        });
-        ElMessage.success('课程删除成功');
-        fetchCourses();
-      } catch {
-        ElMessage.error('按照条件删除课程失败，请稍后重试');
-      }
-    })
-    .catch(() => {});
-};
-
 const handleResetCreateForm = () => {
-  createForm.room_id = '';
+  createForm.lab_id = '';
   createForm.date = '';
   createForm.time_slot = '';
   createForm.reason = '';
@@ -222,7 +191,7 @@ const courseStats = computed(() => {
   const today = courses.value.filter((item) =>
     dayjs(item.date).isSame(dayjs(), 'day')
   ).length;
-  const uniqueRooms = new Set(courses.value.map((item) => item.room_id)).size;
+  const uniqueRooms = new Set(courses.value.map((item) => item.lab_id)).size;
   return { total, today, uniqueRooms };
 });
 
@@ -269,7 +238,7 @@ onMounted(() => {
         </el-form-item>
         <el-form-item label="教室编号">
           <el-input
-            v-model.trim="filters.room_id"
+            v-model.trim="filters.lab_id"
             placeholder="例如 10005"
             clearable
             style="width: 180px"
@@ -299,9 +268,6 @@ onMounted(() => {
             <el-button type="success" @click="createDialogVisible = true">
               新建课程
             </el-button>
-            <el-button type="danger" @click="handleDeleteByCriteria">
-              按条件删除
-            </el-button>
           </el-space>
         </el-form-item>
       </el-form>
@@ -329,7 +295,7 @@ onMounted(() => {
         v-loading="loading"
         empty-text="暂无课程安排"
       >
-        <el-table-column prop="ID" label="ID" width="90" sortable />
+        <el-table-column prop="id" label="ID" width="90" sortable />
         <el-table-column label="日期" width="160">
           <template #default="{ row }">
             {{ formatDate(row.date) }}
@@ -340,7 +306,7 @@ onMounted(() => {
             {{ timeSlotLabel(row.time_slot) }}
           </template>
         </el-table-column>
-        <el-table-column prop="room_id" label="教室" width="120" />
+        <el-table-column prop="lab_id" label="教室" width="120" />
         <el-table-column label="操作" width="160" fixed="right">
           <template #default="{ row }">
             <el-space>
@@ -375,7 +341,7 @@ onMounted(() => {
       <el-form label-width="92px" :model="createForm">
         <el-form-item label="教室编号">
           <el-input
-            v-model.trim="createForm.room_id"
+            v-model.trim="createForm.lab_id"
             placeholder="例如 10005"
             clearable
           />

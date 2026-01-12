@@ -10,6 +10,12 @@ export interface PaginationMeta {
   total: number;
 }
 
+export interface ListResponseData<T> {
+  items: T;
+  total?: number;
+  pagination?: PaginationMeta;
+}
+
 export interface PaginatedResponse<T> extends ApiResponse<T> {
   pagination: PaginationMeta;
 }

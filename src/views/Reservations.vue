@@ -33,7 +33,7 @@ const filters = reactive({
   dateRange: [] as DateRange | [],
   time_slot: '' as TimeSlot | '',
   status: '' as ReservationStatus | '',
-  room_id: '',
+  lab_id: '',
   creator_account: '',
   participant_account: '',
 });
@@ -63,8 +63,8 @@ const buildQuery = (): ReservationQuery => {
   if (filters.status) {
     query.status = filters.status;
   }
-  if (filters.room_id) {
-    query.room_id = Number(filters.room_id);
+  if (filters.lab_id) {
+    query.lab_id = Number(filters.lab_id);
   }
   if (filters.creator_account.trim()) {
     query.creator_account = filters.creator_account.trim();
@@ -79,13 +79,13 @@ const fetchReservations = async () => {
   loading.value = true;
   try {
     const response = await getReservations(buildQuery());
-    reservations.value = response.data;
-    if (response.pagination) {
-      pagination.total = response.pagination.total;
-      pagination.page = response.pagination.page;
-      pagination.size = response.pagination.size;
+    reservations.value = response.data.items ?? [];
+    if (response.data.pagination) {
+      pagination.total = response.data.pagination.total;
+      pagination.page = response.data.pagination.page;
+      pagination.size = response.data.pagination.size;
     } else {
-      pagination.total = response.data?.length ?? 0;
+      pagination.total = response.data.total ?? response.data.items.length ?? 0;
     }
   } catch {
     ElMessage.error('获取预约列表失败，请稍后重试');
@@ -103,7 +103,7 @@ const handleReset = () => {
   filters.dateRange = [];
   filters.time_slot = '';
   filters.status = '';
-  filters.room_id = '';
+  filters.lab_id = '';
   filters.creator_account = '';
   filters.participant_account = '';
   pagination.page = 1;
@@ -134,7 +134,7 @@ const handleCancelReservation = (row: Reservation) => {
   })
     .then(async () => {
       try {
-        await cancelReservation(row.ID);
+        await cancelReservation(row.id);
         ElMessage.success('预约已取消');
         fetchReservations();
       } catch {
@@ -264,7 +264,7 @@ onMounted(() => {
         </el-form-item>
         <el-form-item label="教室编号">
           <el-input
-            v-model.trim="filters.room_id"
+            v-model.trim="filters.lab_id"
             placeholder="例如 10005"
             clearable
             style="width: 180px"
@@ -311,7 +311,7 @@ onMounted(() => {
         v-loading="loading"
         empty-text="暂无预约记录"
       >
-        <el-table-column prop="ID" label="ID" width="80" sortable />
+        <el-table-column prop="id" label="ID" width="80" sortable />
         <el-table-column label="参与者" min-width="200">
           <template #default="{ row }">
             {{ participantNames(row.participants) }}
@@ -327,7 +327,7 @@ onMounted(() => {
             {{ timeSlotLabel(row.time_slot) }}
           </template>
         </el-table-column>
-        <el-table-column prop="room_id" label="教室" width="120" />
+        <el-table-column prop="lab_id" label="教室" width="120" />
         <el-table-column label="状态" width="140">
           <template #default="{ row }">
             <el-tag :type="statusTagType(row.status)" effect="dark">
@@ -394,7 +394,7 @@ onMounted(() => {
               {{ timeSlotLabel(currentReservation?.time_slot) }}
             </el-descriptions-item>
             <el-descriptions-item label="教室">
-              {{ currentReservation?.room_id ?? '—' }}
+              {{ currentReservation?.lab_id ?? '—' }}
             </el-descriptions-item>
             <el-descriptions-item label="状态">
               <el-tag

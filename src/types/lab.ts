@@ -1,9 +1,9 @@
-import type { ApiResponse, PaginationMeta } from './common';
+import type { ApiResponse, ListResponseData } from './common';
 
 export interface Lab {
   id: number;
-  labname: string;
-  labnumber: string;
+  lab_name: string;
+  lab_number: string;
   teacher: string;
   rules: string;
   image: string;
@@ -15,7 +15,7 @@ export interface Lab {
 
 export interface LabQuery {
   q?: string;
-  labnumber?: string;
+  lab_number?: string;
   teacher?: string;
   material?: string;
   page?: number;
@@ -23,21 +23,20 @@ export interface LabQuery {
 }
 
 export interface CreateLabPayload {
-  labname: string;
-  labnumber: string;
+  lab_name: string;
+  lab_number: string;
   teacher: string;
   rules: string;
-  image: string;
+  image: File;
   material: string;
   capacity: number;
 }
 
-export type UpdateLabPayload = Partial<CreateLabPayload>;
-
-export type LabListResponse = ApiResponse<Lab[]> & {
-  pagination?: PaginationMeta;
-  total?: number;
+export type UpdateLabPayload = Partial<Omit<CreateLabPayload, 'image'>> & {
+  image?: File | null;
 };
+
+export type LabListResponse = ApiResponse<ListResponseData<Lab[]>>;
 export type LabDetailResponse = ApiResponse<Lab>;
 export type CreateLabResponse = ApiResponse<Lab> & { code: 201 };
 export type UpdateLabResponse = ApiResponse<Lab>;

@@ -78,7 +78,7 @@ export const useAuthStore = defineStore('auth', () => {
     loading.value = true;
     try {
       const response = await loginRequest(payload);
-      setToken(response.token);
+      setToken(response.data.token);
       setUser(null);
       hasFetchedProfile.value = false;
       await fetchCurrentUser(true);

@@ -38,7 +38,11 @@ export const cancelReservation = async (id: number) => {
   return data;
 };
 
-export const uploadReservationPhotos = async (id: number, files: File[]) => {
+export const uploadReservationPhotos = async (
+  id: number,
+  files: File[],
+  category?: string
+) => {
   const formData = new FormData();
   files.forEach((file) => formData.append('photos', file));
 
@@ -46,7 +50,7 @@ export const uploadReservationPhotos = async (id: number, files: File[]) => {
     `/reservations/${id}/photos`,
     formData,
     {
-      headers: { 'Content-Type': 'multipart/form-data' },
+      params: category ? { category } : undefined,
     }
   );
   return data;

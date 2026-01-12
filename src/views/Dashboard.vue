@@ -51,13 +51,13 @@ const fetchOverview = async () => {
     ]);
 
     if (reservationResponse.status === 'fulfilled') {
-      reservations.value = reservationResponse.value.data;
+      reservations.value = reservationResponse.value.data.items ?? [];
     } else {
       ElMessage.error('获取预约信息失败');
     }
 
     if (courseResponse.status === 'fulfilled') {
-      courses.value = courseResponse.value.data;
+      courses.value = courseResponse.value.data.items ?? [];
     } else {
       ElMessage.error('获取课程信息失败');
     }
@@ -120,7 +120,7 @@ onMounted(() => {
       <div>
         <h1>
           {{ greeting }}，{{
-            currentUser?.Name ?? currentUser?.Account ?? '管理员'
+            currentUser?.name ?? currentUser?.account ?? '管理员'
           }}
         </h1>
         <p class="subtitle">查看实验室运营数据概览，并快速处理待办事项。</p>
@@ -170,14 +170,14 @@ onMounted(() => {
           <el-timeline v-else>
             <el-timeline-item
               v-for="item in recentReservations"
-              :key="item.ID"
+              :key="item.id"
               :timestamp="formatDateTime(item.created_at)"
             >
               <div class="timeline-item">
                 <div class="timeline-title">{{ item.purpose }}</div>
                 <div class="timeline-meta">
                   <span>日期：{{ formatDate(item.date) }}</span>
-                  <span>教室：{{ item.room_id }}</span>
+                  <span>教室：{{ item.lab_id }}</span>
                   <span
                     >状态：{{
                       getReservationStatusMeta(item.status)?.label ??
@@ -209,7 +209,7 @@ onMounted(() => {
                 {{ getTimeSlotLabel(row.time_slot) }}
               </template>
             </el-table-column>
-            <el-table-column prop="room_id" label="教室" width="100" />
+            <el-table-column prop="lab_id" label="教室" width="100" />
           </el-table>
         </el-card>
       </el-col>

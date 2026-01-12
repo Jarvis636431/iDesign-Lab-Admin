@@ -1,11 +1,13 @@
 import http from './http';
 import type {
   ChangePasswordPayload,
+  ChangePasswordResponse,
   LoginPayload,
   LoginResponse,
   RegisterPayload,
   RegisterResponse,
   ResetPasswordPayload,
+  ResetPasswordResponse,
 } from '../types/auth';
 
 export const register = async (payload: RegisterPayload) => {
@@ -19,7 +21,7 @@ export const login = async (payload: LoginPayload) => {
 };
 
 export const changePassword = async (payload: ChangePasswordPayload) => {
-  const { data } = await http.post<{ message: string }>(
+  const { data } = await http.post<ChangePasswordResponse>(
     '/auth/change-password',
     payload
   );
@@ -27,7 +29,7 @@ export const changePassword = async (payload: ChangePasswordPayload) => {
 };
 
 export const resetPassword = async (payload: ResetPasswordPayload) => {
-  const { data } = await http.post<{ message: string }>(
+  const { data } = await http.post<ResetPasswordResponse>(
     '/auth/reset-password',
     payload
   );

@@ -1,38 +1,30 @@
+import type { ApiResponse, ListResponseData } from './common';
+
 export type UserRole = 'student' | 'teacher' | 'admin' | 'temporary';
 export type UserStatus = 'pending' | 'approved' | 'rejected' | 'banned';
-export type ManagementScope = 'admin' | 'teacher';
 
 export interface User {
-  ID: number;
-  Name: string;
-  Account: string;
-  Phone: string;
-  Role: UserRole;
-  Status: UserStatus;
-  Purpose?: string;
-  Grade?: string;
-  CreatedAt?: string;
-  UpdatedAt?: string;
-  DeletedAt?: string | null;
-  Password?: string;
+  id: number;
+  name: string;
+  account: string;
+  email?: string;
+  phone: string;
+  role: UserRole;
+  status: UserStatus;
+  grade?: string;
+  purpose?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
-export interface CurrentUserResponse {
-  code: number;
-  message: string;
-  data: User;
-}
+export type CurrentUserResponse = ApiResponse<User>;
 
-export interface ManagedUserBuckets {
-  pending: User[];
-  approved: User[];
-  rejected: User[];
-  banned: User[];
-}
-
-export interface ManagedUsersResponse {
-  student: ManagedUserBuckets;
-  temporary: ManagedUserBuckets;
+export interface UsersQuery {
+  q?: string;
+  role?: UserRole;
+  status?: UserStatus;
+  page?: number;
+  size?: number;
 }
 
 export interface UpdateUserStatusPayload {
@@ -41,7 +33,10 @@ export interface UpdateUserStatusPayload {
   reason?: string;
 }
 
-export interface UpdateUserStatusResponse {
-  message: string;
+export type UsersListResponse = ApiResponse<ListResponseData<User[]>>;
+
+export type UpdateUserStatusResponse = ApiResponse<{
   updated_count: number;
-}
+  status: UserStatus;
+  user_ids: number[];
+}>;

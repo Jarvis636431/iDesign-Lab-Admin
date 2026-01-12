@@ -21,12 +21,3 @@ export const deleteCourseById = async (id: number) => {
   const { data } = await http.delete<DeleteCourseResponse>(`/courses/${id}`);
   return data;
 };
-
-export const deleteCourseByCriteria = async (
-  params: Required<Pick<CreateCoursePayload, 'room_id' | 'date' | 'time_slot'>>
-) => {
-  const { data } = await http.delete<DeleteCourseResponse>('/courses', {
-    params,
-  });
-  return data;
-};

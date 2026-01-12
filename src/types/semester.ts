@@ -1,7 +1,7 @@
-import type { ApiResponse, PaginatedResponse } from './common';
+import type { ApiResponse, ListResponseData } from './common';
 
 export interface Semester {
-  ID: number;
+  id: number;
   name: string;
   start_date: string;
   end_date: string;
@@ -21,7 +21,7 @@ export interface CreateSemesterPayload {
   is_active?: boolean;
 }
 
-export type GetSemestersResponse = PaginatedResponse<Semester[]>;
+export type GetSemestersResponse = ApiResponse<ListResponseData<Semester[]>>;
 export type GetCurrentSemesterResponse = ApiResponse<Semester>;
 export type CreateSemesterResponse = ApiResponse<Semester> & { code: 201 };
 export type UpdateSemesterResponse = ApiResponse<Semester>;

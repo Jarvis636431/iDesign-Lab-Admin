@@ -2,6 +2,7 @@
 import { computed, onMounted, reactive, ref } from 'vue';
 import dayjs from 'dayjs';
 import { ElMessage, ElMessageBox } from 'element-plus';
+import type { UploadFile } from 'element-plus';
 import { createLab, deleteLab, getLabs, updateLab } from '../services/labs';
 import type { CreateLabPayload, Lab, LabQuery } from '../types/lab';
 
@@ -17,7 +18,7 @@ const pagination = reactive({
 
 const filters = reactive({
   q: '',
-  labnumber: '',
+  lab_number: '',
   teacher: '',
   material: '',
 });
@@ -26,13 +27,14 @@ const dialogVisible = ref(false);
 const editingLab = ref<Lab | null>(null);
 
 const form = reactive({
-  labname: '',
-  labnumber: '',
+  lab_name: '',
+  lab_number: '',
   teacher: '',
   material: '',
   capacity: 0,
   rules: '',
-  image: '',
+  imageFile: null as File | null,
+  imagePreview: '',
 });
 
 const buildQuery = (): LabQuery => {
@@ -41,7 +43,7 @@ const buildQuery = (): LabQuery => {
     size: pagination.size,
   };
   if (filters.q.trim()) query.q = filters.q.trim();
-  if (filters.labnumber.trim()) query.labnumber = filters.labnumber.trim();
+  if (filters.lab_number.trim()) query.lab_number = filters.lab_number.trim();
   if (filters.teacher.trim()) query.teacher = filters.teacher.trim();
   if (filters.material.trim()) query.material = filters.material.trim();
   return query;
@@ -51,13 +53,13 @@ const fetchLabs = async () => {
   loading.value = true;
   try {
     const response = await getLabs(buildQuery());
-    labs.value = response.data ?? [];
-    if (response.pagination) {
-      pagination.page = response.pagination.page;
-      pagination.size = response.pagination.size;
-      pagination.total = response.pagination.total;
+    labs.value = response.data.items ?? [];
+    if (response.data.pagination) {
+      pagination.page = response.data.pagination.page;
+      pagination.size = response.data.pagination.size;
+      pagination.total = response.data.pagination.total;
     } else {
-      pagination.total = response.total ?? response.data?.length ?? 0;
+      pagination.total = response.data.total ?? response.data.items.length ?? 0;
     }
   } catch {
     ElMessage.error('获取实验室列表失败，请稍后重试');
@@ -73,7 +75,7 @@ const handleSearch = () => {
 
 const handleReset = () => {
   filters.q = '';
-  filters.labnumber = '';
+  filters.lab_number = '';
   filters.teacher = '';
   filters.material = '';
   pagination.page = 1;
@@ -93,13 +95,14 @@ const handlePageSizeChange = (size: number) => {
 
 const resetForm = () => {
   editingLab.value = null;
-  form.labname = '';
-  form.labnumber = '';
+  form.lab_name = '';
+  form.lab_number = '';
   form.teacher = '';
   form.material = '';
   form.capacity = 0;
   form.rules = '';
-  form.image = '';
+  form.imageFile = null;
+  form.imagePreview = '';
 };
 
 const openCreateDialog = () => {
@@ -109,22 +112,23 @@ const openCreateDialog = () => {
 
 const openEditDialog = (lab: Lab) => {
   editingLab.value = lab;
-  form.labname = lab.labname ?? '';
-  form.labnumber = lab.labnumber ?? '';
+  form.lab_name = lab.lab_name ?? '';
+  form.lab_number = lab.lab_number ?? '';
   form.teacher = lab.teacher ?? '';
   form.material = lab.material ?? '';
   form.capacity = lab.capacity ?? 0;
   form.rules = lab.rules ?? '';
-  form.image = lab.image ?? '';
+  form.imageFile = null;
+  form.imagePreview = lab.image ?? '';
   dialogVisible.value = true;
 };
 
 const validateForm = () => {
-  if (!form.labname.trim()) {
+  if (!form.lab_name.trim()) {
     ElMessage.warning('请填写实验室名称');
     return false;
   }
-  if (!form.labnumber.trim()) {
+  if (!form.lab_number.trim()) {
     ElMessage.warning('请填写实验室编号');
     return false;
   }
@@ -132,26 +136,44 @@ const validateForm = () => {
     ElMessage.warning('请填写有效容量');
     return false;
   }
+  if (!editingLab.value && !form.imageFile) {
+    ElMessage.warning('请上传实验室图片');
+    return false;
+  }
   return true;
+};
+
+const handleImageChange = (file: UploadFile) => {
+  if (!file.raw) return;
+  form.imageFile = file.raw;
+  form.imagePreview = URL.createObjectURL(file.raw);
 };
 
 const handleSubmit = async () => {
   if (!validateForm()) return;
   submitting.value = true;
-  const payload: CreateLabPayload = {
-    labname: form.labname.trim(),
-    labnumber: form.labnumber.trim(),
-    teacher: form.teacher.trim(),
-    material: form.material.trim(),
-    capacity: form.capacity,
-    rules: form.rules.trim(),
-    image: form.image.trim(),
-  };
   try {
     if (editingLab.value) {
-      await updateLab(editingLab.value.id, payload);
+      await updateLab(editingLab.value.id, {
+        lab_name: form.lab_name.trim(),
+        lab_number: form.lab_number.trim(),
+        teacher: form.teacher.trim(),
+        material: form.material.trim(),
+        capacity: form.capacity,
+        rules: form.rules.trim(),
+        image: form.imageFile ?? undefined,
+      });
       ElMessage.success('实验室更新成功');
     } else {
+      const payload: CreateLabPayload = {
+        lab_name: form.lab_name.trim(),
+        lab_number: form.lab_number.trim(),
+        teacher: form.teacher.trim(),
+        material: form.material.trim(),
+        capacity: form.capacity,
+        rules: form.rules.trim(),
+        image: form.imageFile as File,
+      };
       await createLab(payload);
       ElMessage.success('实验室创建成功');
     }
@@ -165,7 +187,7 @@ const handleSubmit = async () => {
 };
 
 const handleDelete = (lab: Lab) => {
-  ElMessageBox.confirm(`确认删除实验室「${lab.labname}」吗？`, '删除实验室', {
+  ElMessageBox.confirm(`确认删除实验室「${lab.lab_name}」吗？`, '删除实验室', {
     type: 'warning',
     confirmButtonText: '确认删除',
     cancelButtonText: '取消',
@@ -240,7 +262,7 @@ onMounted(() => {
         </el-form-item>
         <el-form-item label="实验室编号">
           <el-input
-            v-model.trim="filters.labnumber"
+            v-model.trim="filters.lab_number"
             placeholder="例如 320"
             clearable
             style="width: 180px"
@@ -294,8 +316,8 @@ onMounted(() => {
         empty-text="暂无实验室信息"
       >
         <el-table-column prop="id" label="ID" width="80" />
-        <el-table-column prop="labname" label="名称" min-width="180" />
-        <el-table-column prop="labnumber" label="编号" width="120" />
+        <el-table-column prop="lab_name" label="名称" min-width="180" />
+        <el-table-column prop="lab_number" label="编号" width="120" />
         <el-table-column prop="teacher" label="负责人" min-width="140" />
         <el-table-column prop="material" label="材料分类" min-width="140" />
         <el-table-column prop="capacity" label="容量" width="100" />
@@ -346,12 +368,12 @@ onMounted(() => {
       <el-form label-width="92px">
         <el-form-item label="实验室名称">
           <el-input
-            v-model.trim="form.labname"
+            v-model.trim="form.lab_name"
             placeholder="例如 快速成型实验室"
           />
         </el-form-item>
         <el-form-item label="实验室编号">
-          <el-input v-model.trim="form.labnumber" placeholder="例如 320" />
+          <el-input v-model.trim="form.lab_number" placeholder="例如 320" />
         </el-form-item>
         <el-form-item label="负责人">
           <el-input v-model.trim="form.teacher" placeholder="例如 李老师" />
@@ -374,8 +396,22 @@ onMounted(() => {
             placeholder="请输入实验室使用规则"
           />
         </el-form-item>
-        <el-form-item label="图片地址">
-          <el-input v-model.trim="form.image" placeholder="https://..." />
+        <el-form-item label="实验室图片">
+          <el-upload
+            :auto-upload="false"
+            :limit="1"
+            accept="image/*"
+            :on-change="handleImageChange"
+            :show-file-list="true"
+          >
+            <el-button type="primary" plain>选择图片</el-button>
+          </el-upload>
+          <div v-if="form.imagePreview" class="image-preview">
+            <span>当前图片：</span>
+            <a :href="form.imagePreview" target="_blank" rel="noreferrer">
+              查看
+            </a>
+          </div>
         </el-form-item>
       </el-form>
 
@@ -448,6 +484,12 @@ onMounted(() => {
   margin-top: 1rem;
   display: flex;
   justify-content: flex-end;
+}
+
+.image-preview {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: #6b7280;
 }
 
 .dialog-footer {

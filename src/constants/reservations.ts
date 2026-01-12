@@ -21,6 +21,7 @@ export const RESERVATION_STATUS_META: Record<
   completed: { label: '已完成', tagType: 'info' },
   cancelled: { label: '已取消', tagType: '' },
   violated: { label: '已违规', tagType: 'danger' },
+  repaired: { label: '已补救', tagType: 'info' },
 };
 
 export const getReservationStatusMeta = (status: ReservationStatus) =>

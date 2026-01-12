@@ -1,12 +1,12 @@
-import type { ApiResponse, PaginatedResponse } from './common';
+import type { ApiResponse, ListResponseData } from './common';
 import type { TimeSlot } from './reservation';
 
 export interface Course {
-  ID: number;
+  id: number;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
-  room_id: number;
+  lab_id: number;
   date: string;
   time_slot: TimeSlot;
   reason: string;
@@ -14,7 +14,7 @@ export interface Course {
 }
 
 export interface CourseQuery {
-  room_id?: number;
+  lab_id?: number;
   start_date?: string;
   end_date?: string;
   time_slot?: TimeSlot;
@@ -23,12 +23,12 @@ export interface CourseQuery {
 }
 
 export interface CreateCoursePayload {
-  room_id: number;
+  lab_id: number;
   date: string;
   time_slot: TimeSlot;
   reason: string;
 }
 
-export type CourseListResponse = PaginatedResponse<Course[]>;
+export type CourseListResponse = ApiResponse<ListResponseData<Course[]>>;
 export type CreateCourseResponse = ApiResponse<Course> & { code: 201 };
 export type DeleteCourseResponse = ApiResponse<Course>;

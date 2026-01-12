@@ -1,3 +1,4 @@
+import type { ApiResponse } from './common';
 import type { UserRole } from './user';
 
 export interface RegisterPayload {
@@ -10,32 +11,34 @@ export interface RegisterPayload {
   role: Extract<UserRole, 'student' | 'temporary'>;
 }
 
-export interface RegisterResponse {
-  message: string;
+export type RegisterResponse = ApiResponse<{
   status: 'pending';
-}
+}>;
 
 export interface LoginPayload {
   account: string;
   password: string;
 }
 
-export interface LoginResponse {
-  message: string;
+export type LoginResponse = ApiResponse<{
   token: string;
   role: UserRole;
   account: string;
   name: string;
   phone?: string;
-}
+}>;
 
 export interface ChangePasswordPayload {
   old_password: string;
   new_password: string;
 }
 
+export type ChangePasswordResponse = ApiResponse<null>;
+
 export interface ResetPasswordPayload {
   account: string;
   phone: string;
   new_password: string;
 }
+
+export type ResetPasswordResponse = ApiResponse<null>;
