@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from "vue";
-import dayjs from "dayjs";
-import { ElMessage, ElMessageBox } from "element-plus";
-import { createLab, deleteLab, getLabs, updateLab } from "../services/labs";
-import type { CreateLabPayload, Lab, LabQuery } from "../types/lab";
+import { computed, onMounted, reactive, ref } from 'vue';
+import dayjs from 'dayjs';
+import { ElMessage, ElMessageBox } from 'element-plus';
+import { createLab, deleteLab, getLabs, updateLab } from '../services/labs';
+import type { CreateLabPayload, Lab, LabQuery } from '../types/lab';
 
 const loading = ref(false);
 const submitting = ref(false);
@@ -16,23 +16,23 @@ const pagination = reactive({
 });
 
 const filters = reactive({
-  q: "",
-  labnumber: "",
-  teacher: "",
-  material: "",
+  q: '',
+  labnumber: '',
+  teacher: '',
+  material: '',
 });
 
 const dialogVisible = ref(false);
 const editingLab = ref<Lab | null>(null);
 
 const form = reactive({
-  labname: "",
-  labnumber: "",
-  teacher: "",
-  material: "",
+  labname: '',
+  labnumber: '',
+  teacher: '',
+  material: '',
   capacity: 0,
-  rules: "",
-  image: "",
+  rules: '',
+  image: '',
 });
 
 const buildQuery = (): LabQuery => {
@@ -60,7 +60,7 @@ const fetchLabs = async () => {
       pagination.total = response.total ?? response.data?.length ?? 0;
     }
   } catch (error) {
-    ElMessage.error("获取实验室列表失败，请稍后重试");
+    ElMessage.error('获取实验室列表失败，请稍后重试');
   } finally {
     loading.value = false;
   }
@@ -72,10 +72,10 @@ const handleSearch = () => {
 };
 
 const handleReset = () => {
-  filters.q = "";
-  filters.labnumber = "";
-  filters.teacher = "";
-  filters.material = "";
+  filters.q = '';
+  filters.labnumber = '';
+  filters.teacher = '';
+  filters.material = '';
   pagination.page = 1;
   fetchLabs();
 };
@@ -93,13 +93,13 @@ const handlePageSizeChange = (size: number) => {
 
 const resetForm = () => {
   editingLab.value = null;
-  form.labname = "";
-  form.labnumber = "";
-  form.teacher = "";
-  form.material = "";
+  form.labname = '';
+  form.labnumber = '';
+  form.teacher = '';
+  form.material = '';
   form.capacity = 0;
-  form.rules = "";
-  form.image = "";
+  form.rules = '';
+  form.image = '';
 };
 
 const openCreateDialog = () => {
@@ -109,27 +109,27 @@ const openCreateDialog = () => {
 
 const openEditDialog = (lab: Lab) => {
   editingLab.value = lab;
-  form.labname = lab.labname ?? "";
-  form.labnumber = lab.labnumber ?? "";
-  form.teacher = lab.teacher ?? "";
-  form.material = lab.material ?? "";
+  form.labname = lab.labname ?? '';
+  form.labnumber = lab.labnumber ?? '';
+  form.teacher = lab.teacher ?? '';
+  form.material = lab.material ?? '';
   form.capacity = lab.capacity ?? 0;
-  form.rules = lab.rules ?? "";
-  form.image = lab.image ?? "";
+  form.rules = lab.rules ?? '';
+  form.image = lab.image ?? '';
   dialogVisible.value = true;
 };
 
 const validateForm = () => {
   if (!form.labname.trim()) {
-    ElMessage.warning("请填写实验室名称");
+    ElMessage.warning('请填写实验室名称');
     return false;
   }
   if (!form.labnumber.trim()) {
-    ElMessage.warning("请填写实验室编号");
+    ElMessage.warning('请填写实验室编号');
     return false;
   }
   if (form.capacity <= 0) {
-    ElMessage.warning("请填写有效容量");
+    ElMessage.warning('请填写有效容量');
     return false;
   }
   return true;
@@ -150,47 +150,50 @@ const handleSubmit = async () => {
   try {
     if (editingLab.value) {
       await updateLab(editingLab.value.id, payload);
-      ElMessage.success("实验室更新成功");
+      ElMessage.success('实验室更新成功');
     } else {
       await createLab(payload);
-      ElMessage.success("实验室创建成功");
+      ElMessage.success('实验室创建成功');
     }
     dialogVisible.value = false;
     fetchLabs();
   } catch (error) {
-    ElMessage.error("保存实验室失败，请稍后重试");
+    ElMessage.error('保存实验室失败，请稍后重试');
   } finally {
     submitting.value = false;
   }
 };
 
 const handleDelete = (lab: Lab) => {
-  ElMessageBox.confirm(`确认删除实验室「${lab.labname}」吗？`, "删除实验室", {
-    type: "warning",
-    confirmButtonText: "确认删除",
-    cancelButtonText: "取消",
+  ElMessageBox.confirm(`确认删除实验室「${lab.labname}」吗？`, '删除实验室', {
+    type: 'warning',
+    confirmButtonText: '确认删除',
+    cancelButtonText: '取消',
   })
     .then(async () => {
       try {
         await deleteLab(lab.id);
-        ElMessage.success("实验室已删除");
+        ElMessage.success('实验室已删除');
         fetchLabs();
       } catch (error) {
-        ElMessage.error("删除实验室失败，请稍后重试");
+        ElMessage.error('删除实验室失败，请稍后重试');
       }
     })
     .catch(() => {});
 };
 
 const formatDate = (value?: string | null) => {
-  if (!value) return "—";
+  if (!value) return '—';
   const parsed = dayjs(value);
-  return parsed.isValid() ? parsed.format("YYYY-MM-DD") : "—";
+  return parsed.isValid() ? parsed.format('YYYY-MM-DD') : '—';
 };
 
 const summary = computed(() => {
   const total = pagination.total;
-  const capacity = labs.value.reduce((sum, item) => sum + (item.capacity ?? 0), 0);
+  const capacity = labs.value.reduce(
+    (sum, item) => sum + (item.capacity ?? 0),
+    0
+  );
   const teachers = new Set(
     labs.value.map((item) => item.teacher).filter((name) => name)
   ).size;
@@ -277,12 +280,7 @@ onMounted(() => {
       <template #header>
         <div class="table-header">
           <span>实验室列表</span>
-          <el-button
-            type="primary"
-            link
-            :loading="loading"
-            @click="fetchLabs"
-          >
+          <el-button type="primary" link :loading="loading" @click="fetchLabs">
             刷新
           </el-button>
         </div>
@@ -347,7 +345,10 @@ onMounted(() => {
     >
       <el-form label-width="92px">
         <el-form-item label="实验室名称">
-          <el-input v-model.trim="form.labname" placeholder="例如 快速成型实验室" />
+          <el-input
+            v-model.trim="form.labname"
+            placeholder="例如 快速成型实验室"
+          />
         </el-form-item>
         <el-form-item label="实验室编号">
           <el-input v-model.trim="form.labnumber" placeholder="例如 320" />
@@ -359,7 +360,11 @@ onMounted(() => {
           <el-input v-model.trim="form.material" placeholder="例如 木工" />
         </el-form-item>
         <el-form-item label="容量">
-          <el-input-number v-model="form.capacity" :min="1" style="width: 100%" />
+          <el-input-number
+            v-model="form.capacity"
+            :min="1"
+            style="width: 100%"
+          />
         </el-form-item>
         <el-form-item label="管理规则">
           <el-input

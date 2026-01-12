@@ -1,6 +1,10 @@
-import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
-import { useAuthStore } from '../stores/auth'
-import AdminLayout from '../layouts/AdminLayout.vue'
+import {
+  createRouter,
+  createWebHistory,
+  type RouteRecordRaw,
+} from 'vue-router';
+import { useAuthStore } from '../stores/auth';
+import AdminLayout from '../layouts/AdminLayout.vue';
 
 const routes: RouteRecordRaw[] = [
   {
@@ -51,26 +55,26 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../views/Login.vue'),
     meta: { public: true, title: '登录' },
   },
-]
+];
 
 const router = createRouter({
   history: createWebHistory(),
   routes,
   scrollBehavior: () => ({ left: 0, top: 0 }),
-})
+});
 
 router.beforeEach(async (to) => {
-  const authStore = useAuthStore()
+  const authStore = useAuthStore();
 
   if (authStore.token) {
     try {
-      await authStore.fetchCurrentUser()
+      await authStore.fetchCurrentUser();
     } catch (error) {
       if (!to.meta.public) {
         return {
           path: '/login',
           query: to.fullPath !== '/' ? { redirect: to.fullPath } : undefined,
-        }
+        };
       }
     }
   }
@@ -79,18 +83,18 @@ router.beforeEach(async (to) => {
     return {
       path: '/login',
       query: to.fullPath !== '/' ? { redirect: to.fullPath } : undefined,
-    }
+    };
   }
 
   if (authStore.isAuthenticated && to.path === '/login') {
-    return { path: '/' }
+    return { path: '/' };
   }
 
   if (to.meta.title && typeof document !== 'undefined') {
-    document.title = `${to.meta.title} · iDesignLab Admin`
+    document.title = `${to.meta.title} · iDesignLab Admin`;
   }
 
-  return true
-})
+  return true;
+});
 
-export default router
+export default router;

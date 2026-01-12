@@ -1,61 +1,62 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
-import type { AxiosError } from 'axios'
-import { useAuthStore } from '../stores/auth'
-import { storeToRefs } from 'pinia'
+import { onMounted, reactive, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { ElMessage } from 'element-plus';
+import type { AxiosError } from 'axios';
+import { useAuthStore } from '../stores/auth';
+import { storeToRefs } from 'pinia';
 
-const logo = new URL('../assets/logo.png', import.meta.url).href
+const logo = new URL('../assets/logo.png', import.meta.url).href;
 
-const router = useRouter()
-const route = useRoute()
-const authStore = useAuthStore()
-const { loading } = storeToRefs(authStore)
+const router = useRouter();
+const route = useRoute();
+const authStore = useAuthStore();
+const { loading } = storeToRefs(authStore);
 
 const form = reactive({
   account: '',
   password: '',
-})
+});
 
-const formError = ref<string | null>(null)
+const formError = ref<string | null>(null);
 
 onMounted(() => {
   if (typeof route.query.account === 'string') {
-    form.account = route.query.account
+    form.account = route.query.account;
   }
-})
+});
 
 const validateForm = () => {
   if (!form.account.trim()) {
-    formError.value = '请填写账号'
-    return false
+    formError.value = '请填写账号';
+    return false;
   }
   if (!form.password.trim()) {
-    formError.value = '请填写密码'
-    return false
+    formError.value = '请填写密码';
+    return false;
   }
-  return true
-}
+  return true;
+};
 
 const handleSubmit = async () => {
-  formError.value = null
-  if (!validateForm()) return
+  formError.value = null;
+  if (!validateForm()) return;
 
   try {
     await authStore.login({
       account: form.account,
       password: form.password,
-    })
-    ElMessage.success('登录成功')
-    const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/'
-    router.replace(redirect)
+    });
+    ElMessage.success('登录成功');
+    const redirect =
+      typeof route.query.redirect === 'string' ? route.query.redirect : '/';
+    router.replace(redirect);
   } catch (error) {
-    const axiosError = error as AxiosError<{ message?: string }>
+    const axiosError = error as AxiosError<{ message?: string }>;
     formError.value =
-      axiosError.response?.data?.message ?? '登录失败，请检查账号与密码'
+      axiosError.response?.data?.message ?? '登录失败，请检查账号与密码';
   }
-}
+};
 </script>
 
 <template>
@@ -93,7 +94,12 @@ const handleSubmit = async () => {
           />
         </el-form-item>
         <div v-if="formError" class="form-error">
-          <el-alert :closable="false" show-icon type="error" :title="formError" />
+          <el-alert
+            :closable="false"
+            show-icon
+            type="error"
+            :title="formError"
+          />
         </div>
         <el-button
           class="login-submit"
@@ -116,8 +122,18 @@ const handleSubmit = async () => {
   gap: 4rem;
   min-height: 100vh;
   padding: 4rem clamp(2rem, 6vw, 6rem);
-  background: radial-gradient(circle at 20% 20%, rgba(64, 158, 255, 0.18), transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(64, 158, 255, 0.12), transparent 55%), #f5f7fb;
+  background:
+    radial-gradient(
+      circle at 20% 20%,
+      rgba(64, 158, 255, 0.18),
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 80%,
+      rgba(64, 158, 255, 0.12),
+      transparent 55%
+    ),
+    #f5f7fb;
 }
 
 .login-hero {

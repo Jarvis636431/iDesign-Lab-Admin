@@ -9,7 +9,7 @@ import {
   Timer,
   OfficeBuilding,
 } from '@element-plus/icons-vue';
-import { ElMessageBox} from 'element-plus';
+import { ElMessageBox } from 'element-plus';
 import { useAuthStore } from '../stores/auth';
 import { storeToRefs } from 'pinia';
 import AdminSidebar from '../components/AdminSidebar.vue';
@@ -101,7 +101,8 @@ const applyTheme = (value: 'light' | 'dark') => {
 };
 
 onMounted(() => {
-  const savedTheme = (localStorage.getItem('app-theme') as 'light' | 'dark') || 'light';
+  const savedTheme =
+    (localStorage.getItem('app-theme') as 'light' | 'dark') || 'light';
   const savedLanguage = localStorage.getItem('app-language');
   applyTheme(savedTheme);
   if (savedLanguage) {
@@ -121,7 +122,6 @@ const getRoleTagType = computed(() => {
   if (role === 'temporary') return 'info';
   return 'info';
 });
-
 
 const changeLanguage = (lang: string) => {
   language.value = lang;

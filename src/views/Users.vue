@@ -1,131 +1,133 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
-import { storeToRefs } from 'pinia'
-import dayjs from 'dayjs'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { useAuthStore } from '../stores/auth'
-import {
-  getManagedUsers,
-  updateManagedUserStatus,
-} from '../services/user'
+import { computed, onMounted, ref, watch } from 'vue';
+import { storeToRefs } from 'pinia';
+import dayjs from 'dayjs';
+import { ElMessage, ElMessageBox } from 'element-plus';
+import { useAuthStore } from '../stores/auth';
+import { getManagedUsers, updateManagedUserStatus } from '../services/user';
 import type {
   ManagedUsersResponse,
   ManagementScope,
   User,
   UserStatus,
-} from '../types/user'
+} from '../types/user';
 
-type RoleTab = 'student' | 'temporary'
-type StatusFilter = UserStatus | 'all'
+type RoleTab = 'student' | 'temporary';
+type StatusFilter = UserStatus | 'all';
 
 interface DisplayUser extends User {
-  __status: UserStatus
+  __status: UserStatus;
 }
 
-const authStore = useAuthStore()
-const { user: currentUser } = storeToRefs(authStore)
+const authStore = useAuthStore();
+const { user: currentUser } = storeToRefs(authStore);
 
 const scope = computed<ManagementScope | null>(() => {
-  if (currentUser.value?.Role === 'admin') return 'admin'
-  if (currentUser.value?.Role === 'teacher') return 'teacher'
-  return null
-})
+  if (currentUser.value?.Role === 'admin') return 'admin';
+  if (currentUser.value?.Role === 'teacher') return 'teacher';
+  return null;
+});
 
-const loading = ref(false)
-const actionLoading = ref(false)
-const managed = ref<ManagedUsersResponse | null>(null)
-const activeRole = ref<RoleTab>('student')
-const activeStatus = ref<StatusFilter>('pending')
-const selectedRows = ref<DisplayUser[]>([])
+const loading = ref(false);
+const actionLoading = ref(false);
+const managed = ref<ManagedUsersResponse | null>(null);
+const activeRole = ref<RoleTab>('student');
+const activeStatus = ref<StatusFilter>('pending');
+const selectedRows = ref<DisplayUser[]>([]);
 
-const statusOptions: Array<{ value: UserStatus; label: string; type: string }> = [
-  { value: 'pending', label: '待审核', type: 'warning' },
-  { value: 'approved', label: '已通过', type: 'success' },
-  { value: 'rejected', label: '已驳回', type: 'info' },
-  { value: 'banned', label: '已封禁', type: 'danger' },
-]
+const statusOptions: Array<{ value: UserStatus; label: string; type: string }> =
+  [
+    { value: 'pending', label: '待审核', type: 'warning' },
+    { value: 'approved', label: '已通过', type: 'success' },
+    { value: 'rejected', label: '已驳回', type: 'info' },
+    { value: 'banned', label: '已封禁', type: 'danger' },
+  ];
 
 const fetchManaged = async () => {
-  if (!scope.value) return
-  loading.value = true
+  if (!scope.value) return;
+  loading.value = true;
   try {
-    const data = await getManagedUsers(scope.value)
-    managed.value = data
+    const data = await getManagedUsers(scope.value);
+    managed.value = data;
   } catch (error) {
-    ElMessage.error('获取用户列表失败，请稍后重试')
-    managed.value = null
+    ElMessage.error('获取用户列表失败，请稍后重试');
+    managed.value = null;
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
-watch(scope, (value) => {
-  if (value) {
-    fetchManaged()
-  }
-}, { immediate: true })
+watch(
+  scope,
+  (value) => {
+    if (value) {
+      fetchManaged();
+    }
+  },
+  { immediate: true }
+);
 
 onMounted(() => {
-  if (scope.value) fetchManaged()
-})
+  if (scope.value) fetchManaged();
+});
 
 watch(activeRole, () => {
-  activeStatus.value = 'pending'
-  resetSelection()
-})
+  activeStatus.value = 'pending';
+  resetSelection();
+});
 
 watch(managed, () => {
-  resetSelection()
-})
+  resetSelection();
+});
 
 const currentBuckets = computed(() => {
-  if (!managed.value) return null
-  return managed.value[activeRole.value]
-})
+  if (!managed.value) return null;
+  return managed.value[activeRole.value];
+});
 
 const statusCounts = computed<Record<UserStatus, number>>(() => {
-  const buckets = currentBuckets.value
+  const buckets = currentBuckets.value;
   if (!buckets) {
     return {
       pending: 0,
       approved: 0,
       rejected: 0,
       banned: 0,
-    }
+    };
   }
   return {
     pending: buckets.pending.length,
     approved: buckets.approved.length,
     rejected: buckets.rejected.length,
     banned: buckets.banned.length,
-  }
-})
+  };
+});
 
 const tableData = computed<DisplayUser[]>(() => {
-  const buckets = currentBuckets.value
-  if (!buckets) return []
+  const buckets = currentBuckets.value;
+  if (!buckets) return [];
   const statuses: UserStatus[] =
     activeStatus.value === 'all'
       ? ['pending', 'approved', 'rejected', 'banned']
-      : [activeStatus.value as UserStatus]
+      : [activeStatus.value as UserStatus];
 
   return statuses.flatMap((status) =>
     (buckets[status] ?? []).map((user) => ({
       ...user,
       __status: status,
     }))
-  )
-})
+  );
+});
 
-const selectedIds = computed(() => selectedRows.value.map((row) => row.ID))
+const selectedIds = computed(() => selectedRows.value.map((row) => row.ID));
 
 const handleSelectionChange = (rows: DisplayUser[]) => {
-  selectedRows.value = rows
-}
+  selectedRows.value = rows;
+};
 
 const resetSelection = () => {
-  selectedRows.value = []
-}
+  selectedRows.value = [];
+};
 
 const confirmAndUpdateStatus = async (
   ids: number[],
@@ -133,20 +135,20 @@ const confirmAndUpdateStatus = async (
   options?: { requireReason?: boolean; message?: string }
 ) => {
   if (!scope.value) {
-    ElMessage.warning('当前账号无权操作用户状态')
-    return
+    ElMessage.warning('当前账号无权操作用户状态');
+    return;
   }
   if (!ids.length) {
-    ElMessage.warning('请先选择用户')
-    return
+    ElMessage.warning('请先选择用户');
+    return;
   }
 
-  const requireReason = options?.requireReason ?? false
+  const requireReason = options?.requireReason ?? false;
   const promptMessage =
     options?.message ??
-    `确认将选中用户状态调整为「${statusOptions.find((item) => item.value === status)?.label ?? status}」吗？`
+    `确认将选中用户状态调整为「${statusOptions.find((item) => item.value === status)?.label ?? status}」吗？`;
 
-  let reason: string | undefined
+  let reason: string | undefined;
 
   try {
     if (requireReason) {
@@ -155,53 +157,53 @@ const confirmAndUpdateStatus = async (
         cancelButtonText: '取消',
         inputPlaceholder: '请填写原因（可选）',
         inputType: 'textarea',
-      })
-      reason = value?.trim() || undefined
+      });
+      reason = value?.trim() || undefined;
     } else {
       await ElMessageBox.confirm(promptMessage, '确认操作', {
         confirmButtonText: '确认',
         cancelButtonText: '取消',
         type: 'warning',
-      })
+      });
     }
   } catch {
-    return
+    return;
   }
 
-  actionLoading.value = true
+  actionLoading.value = true;
   try {
     await updateManagedUserStatus(scope.value, {
       user_ids: ids,
       status,
       reason,
-    })
-    ElMessage.success('用户状态更新成功')
-    resetSelection()
-    fetchManaged()
+    });
+    ElMessage.success('用户状态更新成功');
+    resetSelection();
+    fetchManaged();
   } catch (error) {
-    ElMessage.error('用户状态更新失败，请稍后重试')
+    ElMessage.error('用户状态更新失败，请稍后重试');
   } finally {
-    actionLoading.value = false
+    actionLoading.value = false;
   }
-}
+};
 
 const handleRowAction = (row: DisplayUser, status: UserStatus) => {
-  const requireReason = status === 'rejected' || status === 'banned'
-  confirmAndUpdateStatus([row.ID], status, { requireReason })
-}
+  const requireReason = status === 'rejected' || status === 'banned';
+  confirmAndUpdateStatus([row.ID], status, { requireReason });
+};
 
 const handleBatchAction = (status: UserStatus, message?: string) => {
-  const requireReason = status === 'rejected' || status === 'banned'
-  confirmAndUpdateStatus(selectedIds.value, status, { requireReason, message })
-}
+  const requireReason = status === 'rejected' || status === 'banned';
+  confirmAndUpdateStatus(selectedIds.value, status, { requireReason, message });
+};
 
 const formatDate = (value?: string | null) => {
-  if (!value) return '—'
-  const parsed = dayjs(value)
-  return parsed.isValid() ? parsed.format('YYYY-MM-DD HH:mm') : '—'
-}
+  if (!value) return '—';
+  const parsed = dayjs(value);
+  return parsed.isValid() ? parsed.format('YYYY-MM-DD HH:mm') : '—';
+};
 
-const noPermission = computed(() => !scope.value)
+const noPermission = computed(() => !scope.value);
 </script>
 
 <template>
@@ -309,21 +311,39 @@ const noPermission = computed(() => !scope.value)
               <div class="cell-main">
                 <span class="cell-title">{{ row.Name }}</span>
                 <span class="cell-meta">账号：{{ row.Account }}</span>
-                <span v-if="row.Phone" class="cell-meta">手机：{{ row.Phone }}</span>
+                <span v-if="row.Phone" class="cell-meta"
+                  >手机：{{ row.Phone }}</span
+                >
               </div>
             </template>
           </el-table-column>
           <el-table-column label="角色" width="110">
             <template #default="{ row }">
               <el-tag type="info">
-                {{ row.Role === 'student' ? '学生' : row.Role === 'teacher' ? '教师' : row.Role === 'admin' ? '管理员' : '临时用户' }}
+                {{
+                  row.Role === 'student'
+                    ? '学生'
+                    : row.Role === 'teacher'
+                      ? '教师'
+                      : row.Role === 'admin'
+                        ? '管理员'
+                        : '临时用户'
+                }}
               </el-tag>
             </template>
           </el-table-column>
           <el-table-column label="状态" width="110">
             <template #default="{ row }">
-              <el-tag :type="statusOptions.find((item) => item.value === row.__status)?.type ?? 'info'">
-                {{ statusOptions.find((item) => item.value === row.__status)?.label ?? row.__status }}
+              <el-tag
+                :type="
+                  statusOptions.find((item) => item.value === row.__status)
+                    ?.type ?? 'info'
+                "
+              >
+                {{
+                  statusOptions.find((item) => item.value === row.__status)
+                    ?.label ?? row.__status
+                }}
               </el-tag>
             </template>
           </el-table-column>
@@ -338,8 +358,12 @@ const noPermission = computed(() => !scope.value)
           <el-table-column label="时间" min-width="220">
             <template #default="{ row }">
               <div class="cell-main">
-                <span class="cell-meta">创建：{{ formatDate(row.CreatedAt) }}</span>
-                <span class="cell-meta">更新：{{ formatDate(row.UpdatedAt) }}</span>
+                <span class="cell-meta"
+                  >创建：{{ formatDate(row.CreatedAt) }}</span
+                >
+                <span class="cell-meta"
+                  >更新：{{ formatDate(row.UpdatedAt) }}</span
+                >
               </div>
             </template>
           </el-table-column>

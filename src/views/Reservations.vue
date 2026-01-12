@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from "vue";
-import dayjs from "dayjs";
-import { ElMessage, ElMessageBox } from "element-plus";
-import { getReservations, cancelReservation } from "../services/reservations";
+import { computed, onMounted, reactive, ref } from 'vue';
+import dayjs from 'dayjs';
+import { ElMessage, ElMessageBox } from 'element-plus';
+import { getReservations, cancelReservation } from '../services/reservations';
 import {
   TIME_SLOT_OPTIONS,
   getTimeSlotLabel,
   RESERVATION_STATUS_OPTIONS,
   getReservationStatusMeta,
-} from "../constants/reservations";
+} from '../constants/reservations';
 import type {
   Reservation,
   ReservationQuery,
   ReservationStatus,
   TimeSlot,
-} from "../types/reservation";
+} from '../types/reservation';
 
 type DateRange = [Date, Date];
 
@@ -31,21 +31,21 @@ const pagination = reactive({
 
 const filters = reactive({
   dateRange: [] as DateRange | [],
-  time_slot: "" as TimeSlot | "",
-  status: "" as ReservationStatus | "",
-  room_id: "",
-  creator_account: "",
-  participant_account: "",
+  time_slot: '' as TimeSlot | '',
+  status: '' as ReservationStatus | '',
+  room_id: '',
+  creator_account: '',
+  participant_account: '',
 });
 
 const timeSlotOptions = TIME_SLOT_OPTIONS;
 const statusOptions = RESERVATION_STATUS_OPTIONS;
 
 const statusTagType = (status: ReservationStatus) =>
-  getReservationStatusMeta(status)?.tagType ?? "info";
+  getReservationStatusMeta(status)?.tagType ?? 'info';
 
 const canCancel = (reservation: Reservation) =>
-  reservation.status === "pending";
+  reservation.status === 'pending';
 
 const buildQuery = (): ReservationQuery => {
   const query: ReservationQuery = {
@@ -54,8 +54,8 @@ const buildQuery = (): ReservationQuery => {
   };
   if (filters.dateRange.length === 2) {
     const [start, end] = filters.dateRange;
-    query.start_date = dayjs(start).format("YYYY-MM-DD");
-    query.end_date = dayjs(end).format("YYYY-MM-DD");
+    query.start_date = dayjs(start).format('YYYY-MM-DD');
+    query.end_date = dayjs(end).format('YYYY-MM-DD');
   }
   if (filters.time_slot) {
     query.time_slot = filters.time_slot;
@@ -88,7 +88,7 @@ const fetchReservations = async () => {
       pagination.total = response.data?.length ?? 0;
     }
   } catch (error) {
-    ElMessage.error("获取预约列表失败，请稍后重试");
+    ElMessage.error('获取预约列表失败，请稍后重试');
   } finally {
     loading.value = false;
   }
@@ -101,11 +101,11 @@ const handleSearch = () => {
 
 const handleReset = () => {
   filters.dateRange = [];
-  filters.time_slot = "";
-  filters.status = "";
-  filters.room_id = "";
-  filters.creator_account = "";
-  filters.participant_account = "";
+  filters.time_slot = '';
+  filters.status = '';
+  filters.room_id = '';
+  filters.creator_account = '';
+  filters.participant_account = '';
   pagination.page = 1;
   fetchReservations();
 };
@@ -127,18 +127,18 @@ const handlePageSizeChange = (size: number) => {
 };
 
 const handleCancelReservation = (row: Reservation) => {
-  ElMessageBox.confirm(`确定要取消预约「${row.purpose}」吗？`, "确认取消", {
-    type: "warning",
-    confirmButtonText: "确认取消",
-    cancelButtonText: "再想想",
+  ElMessageBox.confirm(`确定要取消预约「${row.purpose}」吗？`, '确认取消', {
+    type: 'warning',
+    confirmButtonText: '确认取消',
+    cancelButtonText: '再想想',
   })
     .then(async () => {
       try {
         await cancelReservation(row.ID);
-        ElMessage.success("预约已取消");
+        ElMessage.success('预约已取消');
         fetchReservations();
       } catch (error) {
-        ElMessage.error("取消预约失败，请稍后重试");
+        ElMessage.error('取消预约失败，请稍后重试');
       }
     })
     .catch(() => {});
@@ -149,16 +149,16 @@ const timeSlotLabel = getTimeSlotLabel;
 const reservationSummary = computed(() => {
   const total = reservations.value.length;
   const pending = reservations.value.filter(
-    (item) => item.status === "pending"
+    (item) => item.status === 'pending'
   ).length;
   const inProgress = reservations.value.filter(
-    (item) => item.status === "in_progress"
+    (item) => item.status === 'in_progress'
   ).length;
   return { total, pending, inProgress };
 });
 
-const participantNames = (participants: Reservation["participants"]) =>
-  participants.map((item) => item.name).join("、") || "—";
+const participantNames = (participants: Reservation['participants']) =>
+  participants.map((item) => item.name).join('、') || '—';
 
 const currentPhotos = computed(() => {
   const reservation = currentReservation.value;
@@ -186,9 +186,9 @@ const photoCategoryGroups = computed(() =>
 const hasPhotoCategories = computed(() => photoCategoryGroups.value.length > 0);
 
 const formatDate = (value?: string | null) => {
-  if (!value) return "—";
+  if (!value) return '—';
   const parsed = dayjs(value);
-  return parsed.isValid() ? parsed.format("YYYY-MM-DD") : "—";
+  return parsed.isValid() ? parsed.format('YYYY-MM-DD') : '—';
 };
 
 onMounted(() => {
@@ -385,7 +385,7 @@ onMounted(() => {
           <h3>基本信息</h3>
           <el-descriptions :column="1" border size="small">
             <el-descriptions-item label="用途">
-              {{ currentReservation?.purpose ?? "—" }}
+              {{ currentReservation?.purpose ?? '—' }}
             </el-descriptions-item>
             <el-descriptions-item label="日期">
               {{ formatDate(currentReservation?.date) }}
@@ -394,7 +394,7 @@ onMounted(() => {
               {{ timeSlotLabel(currentReservation?.time_slot) }}
             </el-descriptions-item>
             <el-descriptions-item label="教室">
-              {{ currentReservation?.room_id ?? "—" }}
+              {{ currentReservation?.room_id ?? '—' }}
             </el-descriptions-item>
             <el-descriptions-item label="状态">
               <el-tag
@@ -415,10 +415,10 @@ onMounted(() => {
           <h3>创建者</h3>
           <el-descriptions :column="1" border size="small">
             <el-descriptions-item label="姓名">
-              {{ currentReservation?.creator_name ?? "—" }}
+              {{ currentReservation?.creator_name ?? '—' }}
             </el-descriptions-item>
             <el-descriptions-item label="账号">
-              {{ currentReservation?.creator_account ?? "—" }}
+              {{ currentReservation?.creator_account ?? '—' }}
             </el-descriptions-item>
           </el-descriptions>
         </section>

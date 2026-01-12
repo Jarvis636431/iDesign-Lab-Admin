@@ -1,32 +1,32 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useRoute } from 'vue-router'
-import type { User } from '../types/user'
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
+import type { User } from '../types/user';
 
 interface MenuItem {
-  label: string
-  path: string
-  icon: unknown
+  label: string;
+  path: string;
+  icon: unknown;
 }
 
 const props = defineProps<{
-  brandLogo: string
-  menuItems: MenuItem[]
-  currentUser: User | null
-  displayName: string
-  roleDisplay: string
-}>()
+  brandLogo: string;
+  menuItems: MenuItem[];
+  currentUser: User | null;
+  displayName: string;
+  roleDisplay: string;
+}>();
 
 const emit = defineEmits<{
-  (event: 'open-settings'): void
-}>()
+  (event: 'open-settings'): void;
+}>();
 
-const route = useRoute()
+const route = useRoute();
 
 const sidebarClass = computed(() => ({
   'admin-sidebar': true,
-}))
-const handleOpenSettings = () => emit('open-settings')
+}));
+const handleOpenSettings = () => emit('open-settings');
 </script>
 
 <template>
@@ -43,7 +43,11 @@ const handleOpenSettings = () => emit('open-settings')
 
     <div class="sidebar-menu-wrapper">
       <el-menu :default-active="route.path" class="sidebar-menu" router>
-        <el-menu-item v-for="item in menuItems" :key="item.path" :index="item.path">
+        <el-menu-item
+          v-for="item in menuItems"
+          :key="item.path"
+          :index="item.path"
+        >
           <el-icon class="menu-icon">
             <component :is="item.icon" />
           </el-icon>
@@ -62,7 +66,6 @@ const handleOpenSettings = () => emit('open-settings')
           </div>
         </div>
       </div>
-
     </footer>
   </el-aside>
 </template>
@@ -88,8 +91,17 @@ const handleOpenSettings = () => emit('open-settings')
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 16% 8%, rgba(56, 189, 248, 0.15), transparent 45%),
-    radial-gradient(circle at 90% 20%, rgba(45, 212, 191, 0.12), transparent 40%);
+  background:
+    radial-gradient(
+      circle at 16% 8%,
+      rgba(56, 189, 248, 0.15),
+      transparent 45%
+    ),
+    radial-gradient(
+      circle at 90% 20%,
+      rgba(45, 212, 191, 0.12),
+      transparent 40%
+    );
   pointer-events: none;
 }
 
@@ -115,7 +127,11 @@ const handleOpenSettings = () => emit('open-settings')
   width: 44px;
   height: 44px;
   border-radius: 14px;
-  background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(45, 212, 191, 0.12));
+  background: linear-gradient(
+    135deg,
+    rgba(56, 189, 248, 0.2),
+    rgba(45, 212, 191, 0.12)
+  );
   padding: 0.5rem;
   box-shadow: 0 10px 20px rgba(2, 8, 23, 0.35);
 }
@@ -167,7 +183,10 @@ const handleOpenSettings = () => emit('open-settings')
   gap: 12px;
   justify-content: flex-start;
   padding: 0 14px;
-  transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .sidebar-menu :deep(.el-menu-item .el-icon) {
@@ -182,7 +201,11 @@ const handleOpenSettings = () => emit('open-settings')
 }
 
 .sidebar-menu :deep(.el-menu-item.is-active) {
-  background: linear-gradient(135deg, rgba(56, 189, 248, 0.3), rgba(45, 212, 191, 0.2));
+  background: linear-gradient(
+    135deg,
+    rgba(56, 189, 248, 0.3),
+    rgba(45, 212, 191, 0.2)
+  );
   color: #fff;
   box-shadow: 0 10px 22px rgba(2, 8, 23, 0.35);
 }
@@ -222,7 +245,9 @@ const handleOpenSettings = () => emit('open-settings')
   cursor: pointer;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(148, 163, 184, 0.12);
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .user-trigger:hover {

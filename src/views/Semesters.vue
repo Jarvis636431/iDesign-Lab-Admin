@@ -1,167 +1,174 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
-import dayjs from 'dayjs'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { computed, onMounted, reactive, ref } from 'vue';
+import dayjs from 'dayjs';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import {
   getSemesters,
   getCurrentSemester,
   createSemester,
   updateSemester,
-} from '../services/semesters'
-import type { CreateSemesterPayload, Semester, SemesterQuery } from '../types/semester'
+} from '../services/semesters';
+import type {
+  CreateSemesterPayload,
+  Semester,
+  SemesterQuery,
+} from '../types/semester';
 
-const loading = ref(false)
-const currentLoading = ref(false)
-const submitting = ref(false)
+const loading = ref(false);
+const currentLoading = ref(false);
+const submitting = ref(false);
 
-const semesters = ref<Semester[]>([])
-const currentSemester = ref<Semester | null>(null)
+const semesters = ref<Semester[]>([]);
+const currentSemester = ref<Semester | null>(null);
 
 const pagination = reactive({
   page: 1,
   size: 10,
   total: 0,
-})
+});
 
 const filters = reactive({
   is_active: '' as '' | 'true' | 'false',
-})
+});
 
-const dialogVisible = ref(false)
-const editingSemester = ref<Semester | null>(null)
+const dialogVisible = ref(false);
+const editingSemester = ref<Semester | null>(null);
 
 const form = reactive({
   name: '',
   dateRange: [] as [string, string] | [],
   is_active: false,
-})
+});
 
 const buildQuery = (): SemesterQuery => {
   const query: SemesterQuery = {
     page: pagination.page,
     size: pagination.size,
-  }
+  };
   if (filters.is_active) {
-    query.is_active = filters.is_active === 'true'
+    query.is_active = filters.is_active === 'true';
   }
-  return query
-}
+  return query;
+};
 
 const formatDate = (value?: string | null, format = 'YYYY-MM-DD') => {
-  if (!value) return '—'
-  const parsed = dayjs(value)
-  return parsed.isValid() ? parsed.format(format) : '—'
-}
+  if (!value) return '—';
+  const parsed = dayjs(value);
+  return parsed.isValid() ? parsed.format(format) : '—';
+};
 
 const fetchSemesters = async () => {
-  loading.value = true
+  loading.value = true;
   try {
-    const response = await getSemesters(buildQuery())
-    semesters.value = response.data
+    const response = await getSemesters(buildQuery());
+    semesters.value = response.data;
     if (response.pagination) {
-      pagination.total = response.pagination.total
-      pagination.page = response.pagination.page
-      pagination.size = response.pagination.size
+      pagination.total = response.pagination.total;
+      pagination.page = response.pagination.page;
+      pagination.size = response.pagination.size;
     }
   } catch (error) {
-    ElMessage.error('获取学期列表失败，请稍后重试')
+    ElMessage.error('获取学期列表失败，请稍后重试');
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 const fetchCurrentSemester = async () => {
-  currentLoading.value = true
+  currentLoading.value = true;
   try {
-    const response = await getCurrentSemester()
-    currentSemester.value = response.data
+    const response = await getCurrentSemester();
+    currentSemester.value = response.data;
   } catch (error) {
-    currentSemester.value = null
+    currentSemester.value = null;
   } finally {
-    currentLoading.value = false
+    currentLoading.value = false;
   }
-}
+};
 
 const handleSearch = () => {
-  pagination.page = 1
-  fetchSemesters()
-}
+  pagination.page = 1;
+  fetchSemesters();
+};
 
 const handleReset = () => {
-  filters.is_active = ''
-  pagination.page = 1
-  fetchSemesters()
-}
+  filters.is_active = '';
+  pagination.page = 1;
+  fetchSemesters();
+};
 
 const handlePageChange = (page: number) => {
-  pagination.page = page
-  fetchSemesters()
-}
+  pagination.page = page;
+  fetchSemesters();
+};
 
 const handlePageSizeChange = (size: number) => {
-  pagination.size = size
-  pagination.page = 1
-  fetchSemesters()
-}
+  pagination.size = size;
+  pagination.page = 1;
+  fetchSemesters();
+};
 
 const resetForm = () => {
-  editingSemester.value = null
-  form.name = ''
-  form.dateRange = []
-  form.is_active = false
-}
+  editingSemester.value = null;
+  form.name = '';
+  form.dateRange = [];
+  form.is_active = false;
+};
 
 const openCreateDialog = () => {
-  resetForm()
-  dialogVisible.value = true
-}
+  resetForm();
+  dialogVisible.value = true;
+};
 
 const openEditDialog = (semester: Semester) => {
-  editingSemester.value = semester
-  form.name = semester.name
-  form.dateRange = [semester.start_date.slice(0, 10), semester.end_date.slice(0, 10)]
-  form.is_active = semester.is_active
-  dialogVisible.value = true
-}
+  editingSemester.value = semester;
+  form.name = semester.name;
+  form.dateRange = [
+    semester.start_date.slice(0, 10),
+    semester.end_date.slice(0, 10),
+  ];
+  form.is_active = semester.is_active;
+  dialogVisible.value = true;
+};
 
 const validateForm = () => {
   if (!form.name.trim()) {
-    ElMessage.warning('请填写学期名称')
-    return false
+    ElMessage.warning('请填写学期名称');
+    return false;
   }
   if (form.dateRange.length !== 2) {
-    ElMessage.warning('请选择学期开始和结束日期')
-    return false
+    ElMessage.warning('请选择学期开始和结束日期');
+    return false;
   }
-  return true
-}
+  return true;
+};
 
 const handleSubmit = async () => {
-  if (!validateForm()) return
-  submitting.value = true
+  if (!validateForm()) return;
+  submitting.value = true;
   const payload: CreateSemesterPayload = {
     name: form.name.trim(),
     start_date: form.dateRange[0]!,
     end_date: form.dateRange[1]!,
     is_active: form.is_active,
-  }
+  };
   try {
     if (editingSemester.value) {
-      await updateSemester(editingSemester.value.ID, payload)
-      ElMessage.success('学期更新成功')
+      await updateSemester(editingSemester.value.ID, payload);
+      ElMessage.success('学期更新成功');
     } else {
-      await createSemester(payload)
-      ElMessage.success('学期创建成功')
+      await createSemester(payload);
+      ElMessage.success('学期创建成功');
     }
-    dialogVisible.value = false
-    fetchSemesters()
-    fetchCurrentSemester()
+    dialogVisible.value = false;
+    fetchSemesters();
+    fetchCurrentSemester();
   } catch (error) {
-    ElMessage.error('保存学期失败，请稍后重试')
+    ElMessage.error('保存学期失败，请稍后重试');
   } finally {
-    submitting.value = false
+    submitting.value = false;
   }
-}
+};
 
 const handleSetActive = async (semester: Semester) => {
   try {
@@ -173,30 +180,30 @@ const handleSetActive = async (semester: Semester) => {
         confirmButtonText: '确认',
         cancelButtonText: '取消',
       }
-    )
+    );
   } catch {
-    return
+    return;
   }
 
-  submitting.value = true
+  submitting.value = true;
   try {
-    await updateSemester(semester.ID, { is_active: true })
-    ElMessage.success('当前学期已更新')
-    fetchSemesters()
-    fetchCurrentSemester()
+    await updateSemester(semester.ID, { is_active: true });
+    ElMessage.success('当前学期已更新');
+    fetchSemesters();
+    fetchCurrentSemester();
   } catch (error) {
-    ElMessage.error('更新当前学期失败，请稍后重试')
+    ElMessage.error('更新当前学期失败，请稍后重试');
   } finally {
-    submitting.value = false
+    submitting.value = false;
   }
-}
+};
 
-const tableData = computed(() => semesters.value)
+const tableData = computed(() => semesters.value);
 
 onMounted(() => {
-  fetchSemesters()
-  fetchCurrentSemester()
-})
+  fetchSemesters();
+  fetchCurrentSemester();
+});
 </script>
 
 <template>
@@ -206,9 +213,7 @@ onMounted(() => {
         <h1>学期管理</h1>
         <p>在这里维护学期列表、查看当前激活学期并进行切换。</p>
       </div>
-      <el-button type="primary" @click="openCreateDialog">
-        新建学期
-      </el-button>
+      <el-button type="primary" @click="openCreateDialog"> 新建学期 </el-button>
     </header>
 
     <el-row :gutter="16">
@@ -246,7 +251,11 @@ onMounted(() => {
             </el-form-item>
             <el-form-item>
               <el-space>
-                <el-button type="primary" :loading="loading" @click="handleSearch">
+                <el-button
+                  type="primary"
+                  :loading="loading"
+                  @click="handleSearch"
+                >
                   查询
                 </el-button>
                 <el-button @click="handleReset">重置</el-button>
@@ -261,12 +270,23 @@ onMounted(() => {
       <template #header>
         <div class="table-header">
           <span>学期列表</span>
-          <el-button type="primary" link :loading="loading" @click="fetchSemesters">
+          <el-button
+            type="primary"
+            link
+            :loading="loading"
+            @click="fetchSemesters"
+          >
             刷新
           </el-button>
         </div>
       </template>
-      <el-table :data="tableData" border stripe v-loading="loading" empty-text="暂无学期数据">
+      <el-table
+        :data="tableData"
+        border
+        stripe
+        v-loading="loading"
+        empty-text="暂无学期数据"
+      >
         <el-table-column prop="ID" label="ID" width="80" />
         <el-table-column prop="name" label="名称" min-width="180" />
         <el-table-column label="时间范围" min-width="220">
@@ -284,7 +304,9 @@ onMounted(() => {
         <el-table-column label="操作" width="220" fixed="right">
           <template #default="{ row }">
             <el-space>
-              <el-button type="primary" link @click="openEditDialog(row)">编辑</el-button>
+              <el-button type="primary" link @click="openEditDialog(row)"
+                >编辑</el-button
+              >
               <el-button
                 v-if="!row.is_active"
                 type="success"
