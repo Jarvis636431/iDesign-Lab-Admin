@@ -1,8 +1,8 @@
-import http from './http';
+import http from '@/services/http';
 import type {
   ExportReservationsResponse,
   ReservationQuery,
-} from '../types/reservation';
+} from '@/types/reservation';
 
 export const exportReservations = async (
   params?: ReservationQuery & { format?: 'excel' | 'json' }

@@ -3,8 +3,8 @@ import {
   createWebHistory,
   type RouteRecordRaw,
 } from 'vue-router';
-import { useAuthStore } from '../stores/auth';
-import AdminLayout from '../layouts/AdminLayout.vue';
+import { useAuthStore } from '@/stores/auth';
+import AdminLayout from '@/layouts/AdminLayout.vue';
 
 const routes: RouteRecordRaw[] = [
   {
@@ -14,43 +14,43 @@ const routes: RouteRecordRaw[] = [
       {
         path: '',
         name: 'Dashboard',
-        component: () => import('../views/Dashboard.vue'),
+        component: () => import('@/views/Dashboard.vue'),
         meta: { title: '总览' },
       },
       {
         path: 'users',
         name: 'Users',
-        component: () => import('../views/Users.vue'),
+        component: () => import('@/views/Users.vue'),
         meta: { title: '用户管理' },
       },
       {
         path: 'reservations',
         name: 'Reservations',
-        component: () => import('../views/Reservations.vue'),
+        component: () => import('@/views/Reservations.vue'),
         meta: { title: '预约管理' },
       },
       {
         path: 'courses',
         name: 'Courses',
-        component: () => import('../views/Courses.vue'),
+        component: () => import('@/views/Courses.vue'),
         meta: { title: '课程管理' },
       },
       {
         path: 'semesters',
         name: 'Semesters',
-        component: () => import('../views/Semesters.vue'),
+        component: () => import('@/views/Semesters.vue'),
         meta: { title: '学期管理' },
       },
       {
         path: 'labs',
         name: 'Labs',
-        component: () => import('../views/Labs.vue'),
+        component: () => import('@/views/Labs.vue'),
         meta: { title: '教室管理' },
       },
       {
         path: 'equipments',
         name: 'Equipments',
-        component: () => import('../views/Equipments.vue'),
+        component: () => import('@/views/Equipments.vue'),
         meta: { title: '设备管理' },
       },
     ],
@@ -58,7 +58,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/login',
     name: 'Login',
-    component: () => import('../views/Login.vue'),
+    component: () => import('@/views/Login.vue'),
     meta: { public: true, title: '登录' },
   },
 ];

@@ -1,4 +1,4 @@
-import http from './http';
+import http from '@/services/http';
 import type {
   CreateEquipmentPayload,
   CreateEquipmentResponse,
@@ -8,7 +8,7 @@ import type {
   EquipmentQuery,
   UpdateEquipmentPayload,
   UpdateEquipmentResponse,
-} from '../types/equipment';
+} from '@/types/equipment';
 
 export const getEquipments = async (params?: EquipmentQuery) => {
   const { data } = await http.get<EquipmentListResponse>('/equipments', {

@@ -1,4 +1,4 @@
-import http from './http';
+import http from '@/services/http';
 import type {
   ChangePasswordPayload,
   ChangePasswordResponse,
@@ -8,7 +8,7 @@ import type {
   RegisterResponse,
   ResetPasswordPayload,
   ResetPasswordResponse,
-} from '../types/auth';
+} from '@/types/auth';
 
 export const register = async (payload: RegisterPayload) => {
   const { data } = await http.post<RegisterResponse>('/auth/register', payload);

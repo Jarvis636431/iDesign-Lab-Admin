@@ -1,4 +1,4 @@
-import type { ReservationStatus, TimeSlot } from '../types/reservation';
+import type { ReservationStatus, TimeSlot } from '@/types/reservation';
 
 export const TIME_SLOT_OPTIONS: Array<{ label: string; value: TimeSlot }> = [
   { label: '09:00-10:30', value: 'morning' },

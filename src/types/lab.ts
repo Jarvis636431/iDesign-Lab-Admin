@@ -1,4 +1,4 @@
-import type { ApiResponse, ListResponseData } from './common';
+import type { ApiResponse, ListResponseData } from '@/types/common';
 
 export interface Lab {
   id: number;

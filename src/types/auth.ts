@@ -1,5 +1,5 @@
-import type { ApiResponse } from './common';
-import type { UserRole } from './user';
+import type { ApiResponse } from '@/types/common';
+import type { UserRole } from '@/types/user';
 
 export interface RegisterPayload {
   name: string;

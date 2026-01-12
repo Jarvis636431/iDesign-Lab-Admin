@@ -3,7 +3,7 @@ import { onMounted, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import type { AxiosError } from 'axios';
-import { useAuthStore } from '../stores/auth';
+import { useAuthStore } from '@/stores/auth';
 import { storeToRefs } from 'pinia';
 
 const logo = new URL('../assets/logo.png', import.meta.url).href;

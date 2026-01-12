@@ -1,4 +1,4 @@
-import http from './http';
+import http from '@/services/http';
 import type {
   CreateLabPayload,
   DeleteLabResponse,
@@ -8,7 +8,7 @@ import type {
   CreateLabResponse,
   UpdateLabPayload,
   UpdateLabResponse,
-} from '../types/lab';
+} from '@/types/lab';
 
 const buildLabFormData = (payload: UpdateLabPayload | CreateLabPayload) => {
   const formData = new FormData();

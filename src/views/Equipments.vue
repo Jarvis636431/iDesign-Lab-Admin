@@ -7,13 +7,13 @@ import {
   deleteEquipment,
   getEquipments,
   updateEquipment,
-} from '../services/equipments';
+} from '@/services/equipments';
 import type {
   CreateEquipmentPayload,
   Equipment,
   EquipmentQuery,
   EquipmentStatus,
-} from '../types/equipment';
+} from '@/types/equipment';
 
 const loading = ref(false);
 const submitting = ref(false);

@@ -7,12 +7,12 @@ import {
   getCurrentSemester,
   createSemester,
   updateSemester,
-} from '../services/semesters';
+} from '@/services/semesters';
 import type {
   CreateSemesterPayload,
   Semester,
   SemesterQuery,
-} from '../types/semester';
+} from '@/types/semester';
 
 const loading = ref(false);
 const currentLoading = ref(false);

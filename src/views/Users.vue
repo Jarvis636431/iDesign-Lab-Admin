@@ -3,9 +3,9 @@ import { computed, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import dayjs from 'dayjs';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { useAuthStore } from '../stores/auth';
-import { getUsers, updateUserStatus } from '../services/user';
-import type { User, UserStatus } from '../types/user';
+import { useAuthStore } from '@/stores/auth';
+import { getUsers, updateUserStatus } from '@/services/user';
+import type { User, UserStatus } from '@/types/user';
 
 type RoleTab = 'student' | 'temporary';
 type StatusFilter = UserStatus | 'all';

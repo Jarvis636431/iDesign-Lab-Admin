@@ -1,4 +1,4 @@
-import http from './http';
+import http from '@/services/http';
 import type {
   CancelReservationResponse,
   CreateReservationPayload,
@@ -7,7 +7,7 @@ import type {
   ReservationListResponse,
   ReservationQuery,
   UploadReservationPhotosResponse,
-} from '../types/reservation';
+} from '@/types/reservation';
 
 export const getReservations = async (params?: ReservationQuery) => {
   const { data } = await http.get<ReservationListResponse>('/reservations', {

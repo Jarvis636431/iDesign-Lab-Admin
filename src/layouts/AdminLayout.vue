@@ -11,9 +11,9 @@ import {
   Cpu,
 } from '@element-plus/icons-vue';
 import { ElMessageBox } from 'element-plus';
-import { useAuthStore } from '../stores/auth';
+import { useAuthStore } from '@/stores/auth';
 import { storeToRefs } from 'pinia';
-import AdminSidebar from '../components/AdminSidebar.vue';
+import AdminSidebar from '@/components/AdminSidebar.vue';
 
 const router = useRouter();
 const authStore = useAuthStore();

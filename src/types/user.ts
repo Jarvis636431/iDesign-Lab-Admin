@@ -1,4 +1,4 @@
-import type { ApiResponse, ListResponseData } from './common';
+import type { ApiResponse, ListResponseData } from '@/types/common';
 
 export type UserRole = 'student' | 'teacher' | 'admin' | 'temporary';
 export type UserStatus = 'pending' | 'approved' | 'rejected' | 'banned';

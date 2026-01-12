@@ -1,4 +1,4 @@
-import http from './http';
+import http from '@/services/http';
 import type {
   CurrentUserResponse,
   UsersListResponse,
@@ -6,7 +6,7 @@ import type {
   UpdateUserStatusPayload,
   UpdateUserStatusResponse,
   User,
-} from '../types/user';
+} from '@/types/user';
 
 export const getCurrentUser = async () => {
   const { data } = await http.get<CurrentUserResponse>('/users/me');

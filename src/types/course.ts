@@ -1,5 +1,5 @@
-import type { ApiResponse, ListResponseData } from './common';
-import type { TimeSlot } from './reservation';
+import type { ApiResponse, ListResponseData } from '@/types/common';
+import type { TimeSlot } from '@/types/reservation';
 
 export interface Course {
   id: number;

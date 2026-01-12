@@ -1,4 +1,4 @@
-import http from './http';
+import http from '@/services/http';
 import type {
   CreateSemesterPayload,
   CreateSemesterResponse,
@@ -6,7 +6,7 @@ import type {
   GetSemestersResponse,
   SemesterQuery,
   UpdateSemesterResponse,
-} from '../types/semester';
+} from '@/types/semester';
 
 export const getCurrentSemester = async () => {
   const { data } =

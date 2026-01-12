@@ -2,15 +2,15 @@
 import { computed, onMounted, ref } from 'vue';
 import dayjs from 'dayjs';
 import { ElMessage } from 'element-plus';
-import { useAuthStore } from '../stores/auth';
-import { getReservations } from '../services/reservations';
-import { getCourses } from '../services/courses';
+import { useAuthStore } from '@/stores/auth';
+import { getReservations } from '@/services/reservations';
+import { getCourses } from '@/services/courses';
 import {
   getReservationStatusMeta,
   getTimeSlotLabel,
-} from '../constants/reservations';
-import type { Reservation } from '../types/reservation';
-import type { Course } from '../types/course';
+} from '@/constants/reservations';
+import type { Reservation } from '@/types/reservation';
+import type { Course } from '@/types/course';
 
 const authStore = useAuthStore();
 const { user: currentUser } = authStore;

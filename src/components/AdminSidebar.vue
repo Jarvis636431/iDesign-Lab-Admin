@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
-import type { User } from '../types/user';
+import type { User } from '@/types/user';
 
 interface MenuItem {
   label: string;

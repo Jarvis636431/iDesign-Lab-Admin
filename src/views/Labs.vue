@@ -3,8 +3,8 @@ import { computed, onMounted, reactive, ref } from 'vue';
 import dayjs from 'dayjs';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import type { UploadFile } from 'element-plus';
-import { createLab, deleteLab, getLabs, updateLab } from '../services/labs';
-import type { CreateLabPayload, Lab, LabQuery } from '../types/lab';
+import { createLab, deleteLab, getLabs, updateLab } from '@/services/labs';
+import type { CreateLabPayload, Lab, LabQuery } from '@/types/lab';
 
 const loading = ref(false);
 const submitting = ref(false);

@@ -1,9 +1,9 @@
 import { computed, ref } from 'vue';
 import { defineStore } from 'pinia';
-import { login as loginRequest } from '../services/auth';
-import { getCurrentUser } from '../services/user';
-import type { LoginPayload } from '../types/auth';
-import type { User } from '../types/user';
+import { login as loginRequest } from '@/services/auth';
+import { getCurrentUser } from '@/services/user';
+import type { LoginPayload } from '@/types/auth';
+import type { User } from '@/types/user';
 
 const TOKEN_KEY = 'idesignlab_token';
 const USER_KEY = 'idesignlab_user';

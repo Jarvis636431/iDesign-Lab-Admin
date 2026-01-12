@@ -2,19 +2,19 @@
 import { computed, onMounted, reactive, ref } from 'vue';
 import dayjs from 'dayjs';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { getReservations, cancelReservation } from '../services/reservations';
+import { getReservations, cancelReservation } from '@/services/reservations';
 import {
   TIME_SLOT_OPTIONS,
   getTimeSlotLabel,
   RESERVATION_STATUS_OPTIONS,
   getReservationStatusMeta,
-} from '../constants/reservations';
+} from '@/constants/reservations';
 import type {
   Reservation,
   ReservationQuery,
   ReservationStatus,
   TimeSlot,
-} from '../types/reservation';
+} from '@/types/reservation';
 
 type DateRange = [Date, Date];
 

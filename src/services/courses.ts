@@ -1,11 +1,11 @@
-import http from './http';
+import http from '@/services/http';
 import type {
   CourseListResponse,
   CourseQuery,
   CreateCoursePayload,
   CreateCourseResponse,
   DeleteCourseResponse,
-} from '../types/course';
+} from '@/types/course';
 
 export const getCourses = async (params?: CourseQuery) => {
   const { data } = await http.get<CourseListResponse>('/courses', { params });
