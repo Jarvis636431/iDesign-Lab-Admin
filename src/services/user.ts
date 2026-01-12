@@ -5,7 +5,6 @@ import type {
   UsersQuery,
   UpdateUserStatusPayload,
   UpdateUserStatusResponse,
-  User,
 } from '@/types/user';
 
 export const getCurrentUser = async () => {
@@ -24,6 +23,9 @@ export const getUserDetail = async (id: number) => {
 };
 
 export const updateUserStatus = async (payload: UpdateUserStatusPayload) => {
-  const { data } = await http.patch<UpdateUserStatusResponse>('/users', payload);
+  const { data } = await http.patch<UpdateUserStatusResponse>(
+    '/users',
+    payload
+  );
   return data;
 };

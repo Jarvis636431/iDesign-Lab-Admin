@@ -2,11 +2,7 @@
 import { computed, onMounted, reactive, ref } from 'vue';
 import dayjs from 'dayjs';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import {
-  getCourses,
-  createCourse,
-  deleteCourseById,
-} from '@/services/courses';
+import { getCourses, createCourse, deleteCourseById } from '@/services/courses';
 import { TIME_SLOT_OPTIONS, getTimeSlotLabel } from '@/constants/reservations';
 import type { Course, CourseQuery, CreateCoursePayload } from '@/types/course';
 import type { TimeSlot } from '@/types/reservation';

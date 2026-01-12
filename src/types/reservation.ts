@@ -73,7 +73,9 @@ export interface CreateReservationPayload {
   participant_accounts: string[];
 }
 
-export type ReservationListResponse = ApiResponse<ListResponseData<Reservation[]>>;
+export type ReservationListResponse = ApiResponse<
+  ListResponseData<Reservation[]>
+>;
 export type ReservationDetailResponse = ApiResponse<Reservation>;
 
 export interface CreateReservationResponse extends ApiResponse<Reservation> {

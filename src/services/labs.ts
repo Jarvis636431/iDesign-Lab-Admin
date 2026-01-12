@@ -12,10 +12,12 @@ import type {
 
 const buildLabFormData = (payload: UpdateLabPayload | CreateLabPayload) => {
   const formData = new FormData();
-  if (payload.lab_name !== undefined)
+  if (payload.lab_name !== undefined) {
     formData.append('lab_name', payload.lab_name);
-  if (payload.lab_number !== undefined)
+  }
+  if (payload.lab_number !== undefined) {
     formData.append('lab_number', payload.lab_number);
+  }
   if (payload.teacher !== undefined) formData.append('teacher', payload.teacher);
   if (payload.rules !== undefined) formData.append('rules', payload.rules);
   if (payload.capacity !== undefined) {

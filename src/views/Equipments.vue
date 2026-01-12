@@ -43,7 +43,11 @@ const form = reactive({
   status: 'available' as EquipmentStatus,
 });
 
-const statusOptions: Array<{ value: EquipmentStatus; label: string; type: string }> = [
+const statusOptions: Array<{
+  value: EquipmentStatus;
+  label: string;
+  type: string;
+}> = [
   { value: 'available', label: '可用', type: 'success' },
   { value: 'maintenance', label: '维护中', type: 'warning' },
   { value: 'out_of_service', label: '停用', type: 'danger' },
@@ -301,7 +305,12 @@ onMounted(() => {
       <template #header>
         <div class="table-header">
           <span>设备列表</span>
-          <el-button type="primary" link :loading="loading" @click="fetchEquipments">
+          <el-button
+            type="primary"
+            link
+            :loading="loading"
+            @click="fetchEquipments"
+          >
             刷新
           </el-button>
         </div>
@@ -327,7 +336,9 @@ onMounted(() => {
           </template>
         </el-table-column>
         <el-table-column label="创建时间" width="140">
-          <template #default="{ row }">{{ formatDate(row.created_at) }}</template>
+          <template #default="{ row }">
+            {{ formatDate(row.created_at) }}
+          </template>
         </el-table-column>
         <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
