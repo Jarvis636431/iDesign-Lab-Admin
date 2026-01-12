@@ -8,6 +8,7 @@ import {
   Collection,
   Timer,
   OfficeBuilding,
+  Cpu,
 } from '@element-plus/icons-vue';
 import { ElMessageBox } from 'element-plus';
 import { useAuthStore } from '../stores/auth';
@@ -51,6 +52,11 @@ const menuItems = computed(() => {
       label: '教室管理',
       path: '/labs',
       icon: OfficeBuilding,
+    },
+    {
+      label: '设备管理',
+      path: '/equipments',
+      icon: Cpu,
     },
   ];
 });
