@@ -87,7 +87,7 @@ const fetchReservations = async () => {
     } else {
       pagination.total = response.data?.length ?? 0;
     }
-  } catch (error) {
+  } catch {
     ElMessage.error('获取预约列表失败，请稍后重试');
   } finally {
     loading.value = false;
@@ -137,7 +137,7 @@ const handleCancelReservation = (row: Reservation) => {
         await cancelReservation(row.ID);
         ElMessage.success('预约已取消');
         fetchReservations();
-      } catch (error) {
+      } catch {
         ElMessage.error('取消预约失败，请稍后重试');
       }
     })

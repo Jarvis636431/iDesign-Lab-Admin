@@ -49,7 +49,7 @@ const fetchManaged = async () => {
   try {
     const data = await getManagedUsers(scope.value);
     managed.value = data;
-  } catch (error) {
+  } catch {
     ElMessage.error('获取用户列表失败，请稍后重试');
     managed.value = null;
   } finally {
@@ -180,7 +180,7 @@ const confirmAndUpdateStatus = async (
     ElMessage.success('用户状态更新成功');
     resetSelection();
     fetchManaged();
-  } catch (error) {
+  } catch {
     ElMessage.error('用户状态更新失败，请稍后重试');
   } finally {
     actionLoading.value = false;

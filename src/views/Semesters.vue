@@ -67,7 +67,7 @@ const fetchSemesters = async () => {
       pagination.page = response.pagination.page;
       pagination.size = response.pagination.size;
     }
-  } catch (error) {
+  } catch {
     ElMessage.error('获取学期列表失败，请稍后重试');
   } finally {
     loading.value = false;
@@ -79,7 +79,7 @@ const fetchCurrentSemester = async () => {
   try {
     const response = await getCurrentSemester();
     currentSemester.value = response.data;
-  } catch (error) {
+  } catch {
     currentSemester.value = null;
   } finally {
     currentLoading.value = false;
@@ -163,7 +163,7 @@ const handleSubmit = async () => {
     dialogVisible.value = false;
     fetchSemesters();
     fetchCurrentSemester();
-  } catch (error) {
+  } catch {
     ElMessage.error('保存学期失败，请稍后重试');
   } finally {
     submitting.value = false;
@@ -191,7 +191,7 @@ const handleSetActive = async (semester: Semester) => {
     ElMessage.success('当前学期已更新');
     fetchSemesters();
     fetchCurrentSemester();
-  } catch (error) {
+  } catch {
     ElMessage.error('更新当前学期失败，请稍后重试');
   } finally {
     submitting.value = false;

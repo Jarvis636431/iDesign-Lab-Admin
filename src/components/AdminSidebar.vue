@@ -9,7 +9,7 @@ interface MenuItem {
   icon: unknown;
 }
 
-const props = defineProps<{
+defineProps<{
   brandLogo: string;
   menuItems: MenuItem[];
   currentUser: User | null;
@@ -18,7 +18,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (event: 'open-settings'): void;
+  'open-settings': [];
 }>();
 
 const route = useRoute();

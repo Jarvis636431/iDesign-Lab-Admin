@@ -69,7 +69,7 @@ router.beforeEach(async (to) => {
   if (authStore.token) {
     try {
       await authStore.fetchCurrentUser();
-    } catch (error) {
+    } catch {
       if (!to.meta.public) {
         return {
           path: '/login',

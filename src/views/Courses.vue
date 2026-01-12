@@ -74,7 +74,7 @@ const fetchCourses = async () => {
       pagination.page = response.pagination.page;
       pagination.size = response.pagination.size;
     }
-  } catch (error) {
+  } catch {
     ElMessage.error('获取课程列表失败，请稍后重试');
   } finally {
     loading.value = false;
@@ -141,7 +141,7 @@ const handleCreateCourse = async () => {
     createDialogVisible.value = false;
     handleResetCreateForm();
     fetchCourses();
-  } catch (error) {
+  } catch {
     ElMessage.error('课程创建失败，请检查数据或稍后再试');
   } finally {
     submitting.value = false;
@@ -165,7 +165,7 @@ const handleDeleteCourse = (course: Course) => {
         await deleteCourseById(course.ID);
         ElMessage.success('课程删除成功');
         fetchCourses();
-      } catch (error) {
+      } catch {
         ElMessage.error('课程删除失败，请稍后重试');
       }
     })
@@ -197,7 +197,7 @@ const handleDeleteByCriteria = () => {
         });
         ElMessage.success('课程删除成功');
         fetchCourses();
-      } catch (error) {
+      } catch {
         ElMessage.error('按照条件删除课程失败，请稍后重试');
       }
     })

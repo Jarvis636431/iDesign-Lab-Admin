@@ -59,7 +59,7 @@ const fetchLabs = async () => {
     } else {
       pagination.total = response.total ?? response.data?.length ?? 0;
     }
-  } catch (error) {
+  } catch {
     ElMessage.error('获取实验室列表失败，请稍后重试');
   } finally {
     loading.value = false;
@@ -157,7 +157,7 @@ const handleSubmit = async () => {
     }
     dialogVisible.value = false;
     fetchLabs();
-  } catch (error) {
+  } catch {
     ElMessage.error('保存实验室失败，请稍后重试');
   } finally {
     submitting.value = false;
@@ -175,7 +175,7 @@ const handleDelete = (lab: Lab) => {
         await deleteLab(lab.id);
         ElMessage.success('实验室已删除');
         fetchLabs();
-      } catch (error) {
+      } catch {
         ElMessage.error('删除实验室失败，请稍后重试');
       }
     })
