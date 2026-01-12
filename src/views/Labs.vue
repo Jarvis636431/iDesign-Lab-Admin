@@ -316,6 +316,8 @@ onMounted(() => {
               v-if="row.image"
               :src="resolveImageUrl(row.image)"
               :preview-src-list="[resolveImageUrl(row.image)]"
+              :preview-teleported="true"
+              :z-index="3000"
               fit="cover"
               class="lab-image"
             />
@@ -324,7 +326,6 @@ onMounted(() => {
         </el-table-column>
         <el-table-column prop="lab_number" label="编号" width="120" />
         <el-table-column prop="teacher" label="负责人" min-width="140" />
-        <el-table-column prop="material" label="材料分类" min-width="140" />
         <el-table-column prop="capacity" label="容量" width="100" />
         <el-table-column label="更新日期" width="140">
           <template #default="{ row }">
