@@ -7,7 +7,6 @@ export interface Lab {
   teacher: string;
   rules: string;
   image: string;
-  material: string;
   capacity: number;
   created_at: string;
   updated_at: string;
@@ -17,7 +16,6 @@ export interface LabQuery {
   q?: string;
   lab_number?: string;
   teacher?: string;
-  material?: string;
   page?: number;
   size?: number;
 }
@@ -28,7 +26,6 @@ export interface CreateLabPayload {
   teacher: string;
   rules: string;
   image: File;
-  material: string;
   capacity: number;
 }
 

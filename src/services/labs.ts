@@ -18,8 +18,6 @@ const buildLabFormData = (payload: UpdateLabPayload | CreateLabPayload) => {
     formData.append('lab_number', payload.lab_number);
   if (payload.teacher !== undefined) formData.append('teacher', payload.teacher);
   if (payload.rules !== undefined) formData.append('rules', payload.rules);
-  if (payload.material !== undefined)
-    formData.append('material', payload.material);
   if (payload.capacity !== undefined) {
     formData.append('capacity', String(payload.capacity));
   }

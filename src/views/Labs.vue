@@ -20,7 +20,6 @@ const filters = reactive({
   q: '',
   lab_number: '',
   teacher: '',
-  material: '',
 });
 
 const dialogVisible = ref(false);
@@ -30,7 +29,6 @@ const form = reactive({
   lab_name: '',
   lab_number: '',
   teacher: '',
-  material: '',
   capacity: 0,
   rules: '',
   imageFile: null as File | null,
@@ -45,7 +43,6 @@ const buildQuery = (): LabQuery => {
   if (filters.q.trim()) query.q = filters.q.trim();
   if (filters.lab_number.trim()) query.lab_number = filters.lab_number.trim();
   if (filters.teacher.trim()) query.teacher = filters.teacher.trim();
-  if (filters.material.trim()) query.material = filters.material.trim();
   return query;
 };
 
@@ -77,7 +74,6 @@ const handleReset = () => {
   filters.q = '';
   filters.lab_number = '';
   filters.teacher = '';
-  filters.material = '';
   pagination.page = 1;
   fetchLabs();
 };
@@ -98,7 +94,6 @@ const resetForm = () => {
   form.lab_name = '';
   form.lab_number = '';
   form.teacher = '';
-  form.material = '';
   form.capacity = 0;
   form.rules = '';
   form.imageFile = null;
@@ -115,7 +110,6 @@ const openEditDialog = (lab: Lab) => {
   form.lab_name = lab.lab_name ?? '';
   form.lab_number = lab.lab_number ?? '';
   form.teacher = lab.teacher ?? '';
-  form.material = lab.material ?? '';
   form.capacity = lab.capacity ?? 0;
   form.rules = lab.rules ?? '';
   form.imageFile = null;
@@ -158,7 +152,6 @@ const handleSubmit = async () => {
         lab_name: form.lab_name.trim(),
         lab_number: form.lab_number.trim(),
         teacher: form.teacher.trim(),
-        material: form.material.trim(),
         capacity: form.capacity,
         rules: form.rules.trim(),
         image: form.imageFile ?? undefined,
@@ -169,7 +162,6 @@ const handleSubmit = async () => {
         lab_name: form.lab_name.trim(),
         lab_number: form.lab_number.trim(),
         teacher: form.teacher.trim(),
-        material: form.material.trim(),
         capacity: form.capacity,
         rules: form.rules.trim(),
         image: form.imageFile as File,
@@ -276,14 +268,6 @@ onMounted(() => {
             style="width: 180px"
           />
         </el-form-item>
-        <el-form-item label="材料分类">
-          <el-input
-            v-model.trim="filters.material"
-            placeholder="例如 木工"
-            clearable
-            style="width: 180px"
-          />
-        </el-form-item>
         <el-form-item>
           <el-space>
             <el-button type="primary" :loading="loading" @click="handleSearch">
@@ -317,6 +301,18 @@ onMounted(() => {
       >
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="lab_name" label="名称" min-width="180" />
+        <el-table-column label="图片" width="110">
+          <template #default="{ row }">
+            <el-image
+              v-if="row.image"
+              :src="row.image"
+              :preview-src-list="[row.image]"
+              fit="cover"
+              class="lab-image"
+            />
+            <span v-else class="text-muted">—</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="lab_number" label="编号" width="120" />
         <el-table-column prop="teacher" label="负责人" min-width="140" />
         <el-table-column prop="material" label="材料分类" min-width="140" />
@@ -377,9 +373,6 @@ onMounted(() => {
         </el-form-item>
         <el-form-item label="负责人">
           <el-input v-model.trim="form.teacher" placeholder="例如 李老师" />
-        </el-form-item>
-        <el-form-item label="材料分类">
-          <el-input v-model.trim="form.material" placeholder="例如 木工" />
         </el-form-item>
         <el-form-item label="容量">
           <el-input-number
@@ -468,6 +461,16 @@ onMounted(() => {
 .summary-label {
   font-size: 0.85rem;
   color: #6b7280;
+}
+
+.lab-image {
+  width: 64px;
+  height: 40px;
+  border-radius: 6px;
+}
+
+.text-muted {
+  color: #9ca3af;
 }
 
 .filters-card {
